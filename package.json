@@ -1,0 +1,16 @@
+{
+	"name": "todo-ai-dlc",
+	"private": true,
+	"packageManager": "pnpm@9.15.0",
+	"scripts": {
+		"dev": "pnpm --filter @todo-ai-dlc/frontend dev",
+		"build": "pnpm -r build",
+		"test": "pnpm -r test",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4"
+	}
+}

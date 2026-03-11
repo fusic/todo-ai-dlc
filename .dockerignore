@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (rebuilt in container)
+node_modules
+
+# Build outputs
+dist
+*.tsbuildinfo
+cdk.out
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Documentation (not needed in image)
+aidlc-docs
+*.md
+
+# Test / Coverage
+coverage
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# Docker (avoid recursive copy)
+Dockerfile*
+docker-compose.yml
+docker-data
+
+# Logs / Secrets
+*.log
+*.pem
+*.key
