@@ -1,0 +1,24 @@
+{
+	"name": "@todo-ai-dlc/infrastructure",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"cdk": "cdk",
+		"synth": "cdk synth",
+		"deploy": "cdk deploy",
+		"diff": "cdk diff",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"aws-cdk-lib": "2.177.0",
+		"constructs": "^10.4.0"
+	},
+	"devDependencies": {
+		"aws-cdk": "2.177.0",
+		"tsx": "^4.19.0",
+		"typescript": "^5.7.0",
+		"vitest": "^2.1.0"
+	}
+}

@@ -1,0 +1,18 @@
+FROM node:20-slim
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /app
+
+# Copy workspace config and all package.json files for dependency caching
+COPY package.json pnpm-workspace.yaml ./
+COPY packages/backend/package.json packages/backend/
+COPY packages/frontend/package.json packages/frontend/
+COPY packages/infrastructure/package.json packages/infrastructure/
+
+# Copy lockfile if exists
+COPY pnpm-lock.yaml* ./
+
+RUN pnpm install --frozen-lockfile || pnpm install
+
+# Source code is mounted via docker compose volumes
