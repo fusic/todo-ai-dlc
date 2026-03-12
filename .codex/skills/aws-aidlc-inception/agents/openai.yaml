@@ -1,0 +1,4 @@
+interface:
+  display_name: "AWS AI-DLC Inception"
+  short_description: "Run the repo-local AWS AI-DLC inception workflow from .claude and .aidlc-workflows"
+  default_prompt: "Use the repo-local AWS AI-DLC inception workflow defined in .claude/commands/aws-aidlc-inception.md and .aidlc-workflows to analyze the current project, gather requirements, and produce inception artifacts. Treat any extra user text as the initial request."
