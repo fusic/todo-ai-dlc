@@ -2,13 +2,16 @@
 
 TODO 管理アプリケーション（React + Hono + DynamoDB）
 
+## 前提条件
+
+| ツール | 必須 | 備考 |
+|--------|------|------|
+| [Rancher Desktop](https://rancherdesktop.io/) | **必須** | Container Engine は **dockerd (moby)** を選択してください。Docker Desktop でも代替可能ですが、本プロジェクトでは Rancher Desktop を標準としています |
+| [Node.js](https://nodejs.org/) 20+ | ホスト直接開発時 | Docker のみで開発する場合は不要 |
+| [pnpm](https://pnpm.io/) 9.15+ | ホスト直接開発時 | `corepack enable` で有効化 |
+| Git | **必須** | |
+
 ## ローカル開発環境（Rancher Desktop / Docker）
-
-### 前提条件
-
-- [Rancher Desktop](https://rancherdesktop.io/) または Docker Desktop
-  - Rancher Desktop の場合、Container Engine は **dockerd (moby)** を推奨
-- Git
 
 ### セットアップ
 
@@ -72,20 +75,45 @@ packages/
   └── infrastructure/ # AWS CDK
 ```
 
-## AIDLC ワークフロー（任意）
+## AIDLC ワークフロー（必須）
 
-AI-DLC による開発ワークフローを使用する場合：
+本プロジェクトでは [AI-DLC（AI Development Lifecycle）](https://github.com/awslabs/aidlc-workflows) ワークフローを採用しています。要件定義・設計・実装のすべてのフェーズで AIDLC を使用するため、開発開始前に必ずセットアップしてください。
+
+### セットアップ
 
 ```bash
 git clone https://github.com/awslabs/aidlc-workflows.git .aidlc-workflows
 ```
 
-Claude Code で `/aws-aidlc-inception` `/aws-aidlc-construction` コマンドが利用可能になります。
+### 利用方法
 
-Codex で同等の Skill を使う場合は、repo 内の定義を `~/.codex/skills` に連携します。
+**Claude Code** では以下のコマンドが利用可能になります：
+
+- `/aws-aidlc-inception` — 要件定義・設計フェーズ（Inception）
+- `/aws-aidlc-construction` — 実装・テストフェーズ（Construction）
+
+**Codex** で同等の Skill を使う場合は、repo 内の定義を `~/.codex/skills` に連携します：
 
 ```bash
 bash scripts/install-codex-skills.sh
 ```
 
 必要に応じて `CODEX_SKILLS_HOME=/path/to/skills` で導入先を切り替えられます。導入後は Codex を再起動すると `aws-aidlc-inception` と `aws-aidlc-construction` が利用可能になります。
+
+### AIDLC 成果物
+
+AIDLC ワークフローの成果物は `aidlc-docs/` に格納されます：
+
+```
+aidlc-docs/
+  ├── inception/         # 要件定義・アプリケーション設計
+  │   ├── requirements/  # 要件定義
+  │   ├── application-design/  # コンポーネント設計・サービス定義
+  │   └── plans/         # 実行計画
+  └── construction/      # 実装成果物
+      ├── plans/         # コード生成計画
+      ├── backend/       # Backend 実装サマリー
+      ├── frontend/      # Frontend 実装サマリー
+      ├── infrastructure/ # インフラ設計・実装サマリー
+      └── build-and-test/ # ビルド・テスト手順
+```
