@@ -81,3 +81,11 @@ git clone https://github.com/awslabs/aidlc-workflows.git .aidlc-workflows
 ```
 
 Claude Code で `/aws-aidlc-inception` `/aws-aidlc-construction` コマンドが利用可能になります。
+
+Codex で同等の Skill を使う場合は、repo 内の定義を `~/.codex/skills` に連携します。
+
+```bash
+bash scripts/install-codex-skills.sh
+```
+
+必要に応じて `CODEX_SKILLS_HOME=/path/to/skills` で導入先を切り替えられます。導入後は Codex を再起動すると `aws-aidlc-inception` と `aws-aidlc-construction` が利用可能になります。
