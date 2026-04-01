@@ -99,8 +99,8 @@ importers:
         version: 10.5.1
     devDependencies:
       aws-cdk:
-        specifier: 2.177.0
-        version: 2.177.0
+        specifier: 2.178.2
+        version: 2.178.2
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
@@ -344,6 +344,10 @@ packages:
 
   '@babel/runtime@7.28.6':
     resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.29.2':
+    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.28.6':
@@ -1436,8 +1440,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.177.0:
-    resolution: {integrity: sha512-TiBoyE5wMB5q4jX1bELwkklgbs5eLY1Phjfnb4Mof0K9tOSRJ9UEq6xEamF0esMS+TuYU7a/ESTpmKX3iYqA3w==}
+  aws-cdk@2.178.2:
+    resolution: {integrity: sha512-ojMCMnBGinvDUD6+BOOlUOB9pjsYXoQdFVbf4bvi3dy3nwn557r0j6qDUcJMeikzPJ6YWzfAdL0fYxBZg4xcOg==}
     engines: {node: '>= 14.15.0'}
     hasBin: true
 
@@ -2633,6 +2637,8 @@ snapshots:
 
   '@babel/runtime@7.28.6': {}
 
+  '@babel/runtime@7.29.2': {}
+
   '@babel/template@7.28.6':
     dependencies:
       '@babel/code-frame': 7.29.0
@@ -3387,7 +3393,7 @@ snapshots:
   '@testing-library/dom@10.4.1':
     dependencies:
       '@babel/code-frame': 7.29.0
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.2
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       dom-accessibility-api: 0.5.16
@@ -3525,7 +3531,7 @@ snapshots:
       '@aws-cdk/cloud-assembly-schema': 39.2.20
       constructs: 10.5.1
 
-  aws-cdk@2.177.0:
+  aws-cdk@2.178.2:
     optionalDependencies:
       fsevents: 2.3.2
 
