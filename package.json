@@ -1,5 +1,12 @@
 {
 	"name": "todo-ai-dlc",
+	"description": "AWS AI-DLC ワークフロー実践教材 — React + Hono + DynamoDB による TODO アプリケーション",
+	"license": "MIT",
+	"author": "Fusic Co., Ltd.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/fusic/todo-ai-dlc.git"
+	},
 	"private": true,
 	"packageManager": "pnpm@9.15.0",
 	"scripts": {

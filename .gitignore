@@ -38,5 +38,9 @@ docker-data/
 *.pem
 *.key
 
+# Python cache
+__pycache__/
+
 # AIDLC workflows (clone separately)
 .aidlc-workflows/
+aidlc-docs/aidlc-state.md
