@@ -1,0 +1,4 @@
+interface:
+  display_name: "AWS AI-DLC Construction"
+  short_description: "Run the repo-local AWS AI-DLC construction workflow from .claude and .aidlc-workflows"
+  default_prompt: "Use the repo-local AWS AI-DLC construction workflow defined in .claude/commands/aws-aidlc-construction.md and .aidlc-workflows to design, implement, and verify units from inception artifacts. Treat any extra user text as the construction request."
