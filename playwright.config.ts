@@ -14,6 +14,9 @@ export default defineConfig({
 	reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : [["list"]],
 	use: {
 		baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
+		// オリジン検証（BR-013 / RF-16）の dev 専用値を注入（D-1 / C-5）。
+		// page 経由は Vite proxy も同値を付与するが、request fixture（BT-7）にも確実に載せる
+		extraHTTPHeaders: { "x-origin-verify": "local-dev-only" },
 		// 失敗時は Playwright トレースで調査する（nfr-design E2E スモークパターン）
 		trace: "retain-on-failure",
 	},

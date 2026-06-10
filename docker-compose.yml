@@ -41,6 +41,9 @@ services:
       TABLE_NAME: TodoTable
       AWS_ACCESS_KEY_ID: dummy
       AWS_SECRET_ACCESS_KEY: dummy
+      # オリジン検証（BR-013 / RF-16）の dev 専用値 — 検証ミドルウェアは常時有効（D-1）。
+      # 本番値（Secrets Manager 自動生成）とは完全に独立した自明な値（C-5 — コミット可）
+      ORIGIN_VERIFY_SECRET: local-dev-only
     volumes:
       - ./tsconfig.json:/app/tsconfig.json
       - ./packages/shared/src:/app/packages/shared/src

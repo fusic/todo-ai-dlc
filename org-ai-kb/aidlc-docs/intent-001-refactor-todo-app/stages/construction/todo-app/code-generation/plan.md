@@ -99,20 +99,39 @@
 
 ### P2 — 基盤（RF-14〜22）
 
-- [ ] 11. **IaC 変更 + infrastructure テスト（RF-14/15/17 + RF-16 IaC 側）** — `todo-stack.ts` へ CH-1〜CH-10 を適用（PITR 移行 / 明示 LogGroup / IAM 5 アクション / corsPreflight 削除 / OriginVerifySecret / customHeaders / ORIGIN_VERIFY_SECRET / アラーム 4 種 + SNS / CfnOutput 整理）。`test/todo-stack.test.ts` を IT-1〜IT-10 で拡充。検証: `pnpm --filter @todo-ai-dlc/infrastructure test` + synth green（synth テンプレートに平文 0 件）
-- [ ] 12. **CMP-002: オリジン検証ミドルウェア（RF-16 API 側 / BR-013 / QT-4 / D-1）** — `x-origin-verify` と `ORIGIN_VERIFY_SECRET` の一致検証・不一致/欠落 403・常時有効（フェイルオープンなし）。dev 値 `local-dev-only` をローカル 3 箇所（docker-compose / Vite proxy / Playwright）へ注入（C-5）。テスト: 一致 / 不一致 / 欠落 + E2E BT-7（誤 403 回帰検知）
-- [ ] 13. **依存メジャー更新（RF-18 — 範囲 = Q2 回答）** — Vitest 3 / Vite 7 / Biome 2 / CDK 現行版（完全固定維持 — C-2）。C-7: `node:20-slim` が ≥ 20.19 であることを確認（不適合なら 20 系内で更新）。検証: lint / typecheck / test / build / synth / E2E 全 green
-- [ ] 14. **Renovate 設定（RF-19 / QT-8）** — `renovate.json`（minor/patch グループ化、pnpm workspace 対応）
-- [ ] 15. **デプロイ 1 コマンド化 + README（RF-20）** — frontend build → cdk deploy の順序を内包するスクリプト、SNS 購読手順 1 行（`AlarmTopicArn` 出力参照 — D-5）
-- [ ] 16. **ローカル開発堅牢化（RF-21）** — `dev.ts` の PORT 環境変数化ほか docker-compose / Dockerfile.dev の堅牢化（業務振る舞い変更なし）
-- [ ] 17. **文書の現状一致（RF-22①③ + v1 文書 — 範囲 = Q4 回答）** — TodoForm インライン編集記述 / SDK 戦略記述の修正（② PUT 部分更新は v2 文書化済み）
-- [ ] フェーズ末: 全検証コマンド（lint / typecheck / test / build / synth / audit / E2E）green
+- [x] 11. **IaC 変更 + infrastructure テスト（RF-14/15/17 + RF-16 IaC 側）** — `todo-stack.ts` へ CH-1〜CH-10 を適用（PITR 移行 / 明示 LogGroup / IAM 5 アクション / corsPreflight 削除 / OriginVerifySecret / customHeaders / ORIGIN_VERIFY_SECRET / アラーム 4 種 + SNS / CfnOutput 整理）。`test/todo-stack.test.ts` を IT-1〜IT-10 で拡充。検証: `pnpm --filter @todo-ai-dlc/infrastructure test` + synth green（synth テンプレートに平文 0 件）
+  - 実施: CH-1〜CH-10 全件適用。`pointInTimeRecoverySpecification` が aws-cdk-lib 2.177.0 に存在しないため（requirements「RF-17 は RF-18 と同時実施」どおり）CDK 更新を本ステップで実施 — aws-cdk-lib **2.258.1** / aws-cdk **2.1126.0**（完全固定維持 — C-2）。IT-1〜IT-10 を既存 7 件と別 describe で追加（IT-1 は「ちょうど 5 アクション」、IT-4/IT-5 は `{{resolve:secretsmanager:` 動的参照、IT-8 は Custom::LogRetention 0 件 + 90 日保持、IT-10 は ApiUrl 説明文の 403 明記を assert）。検証: infrastructure 17/17 green / typecheck green / synth exit 0（deprecation 警告 0・動的参照 2 箇所・Custom::LogRetention 0）/ lint green
+- [x] 12. **CMP-002: オリジン検証ミドルウェア（RF-16 API 側 / BR-013 / QT-4 / D-1）** — `x-origin-verify` と `ORIGIN_VERIFY_SECRET` の一致検証・不一致/欠落 403・常時有効（フェイルオープンなし）。dev 値 `local-dev-only` をローカル 3 箇所（docker-compose / Vite proxy / Playwright）へ注入（C-5）。テスト: 一致 / 不一致 / 欠落 + E2E BT-7（誤 403 回帰検知）
+  - 実施: `middleware/originVerify.ts` 新設（期待値未設定もフェイルクローズ 403、403 ボディは `{error:"Forbidden"}` — 内部情報なし）。index.ts でアクセスログの後段に全ルート適用（403 拒否もログに残る）。注入 3 箇所 = docker-compose environment / Vite proxy headers / Playwright extraHTTPHeaders。加えてホスト直接起動（README 記載の開発経路）向けに dev.ts（ローカル専用エントリ・Lambda バンドル対象外）へ dev 既定値を補完 — ミドルウェアは常時有効のままで D-1 不変。テスト 5 件追加（middleware 4: 一致/不一致/欠落/フェイルクローズ + index 配線 1: 403 + アクセスログ記録）。backend 42 件 green / lint / typecheck green
+- [x] 13. **依存メジャー更新（RF-18 — 範囲 = Q2 回答）** — Vitest 3 / Vite 7 / Biome 2 / CDK 現行版（完全固定維持 — C-2）。C-7: `node:20-slim` が ≥ 20.19 であることを確認（不適合なら 20 系内で更新）。検証: lint / typecheck / test / build / synth / E2E 全 green
+  - 実施: Vitest **^3.2.6**（4 パッケージ — テストコード変更なしで green）/ Vite **^7.3.5** + peer 随伴 @vitejs/plugin-react **^5.2.0**（6.x は Vite 8 専用のため不採用。jsdom / tailwindcss はレンジ内のまま）/ Biome **2.4.16**（`biome migrate --write` で設定移行 + 新規 error の useExhaustiveDependencies に App.tsx の loadTodos useCallback 化で対応 — マウント時 1 回実行の振る舞い不変）/ CDK は Step 11 で 2.258.1 / CLI 2.1126.0 へ更新済み（完全固定維持）。**GHSA-5xrq-8626-4rwp の ignore を削除**（package.json の pnpm.auditConfig + auditIgnoreReasons ブロックごと撤去、pnpm-workspace.yaml は運用コメントのみ残置）→ `pnpm audit --audit-level=high` exit 0（ignore 0 件）。C-7: `node:20-slim` = **v20.20.2 ≥ 20.19** 確認（イメージ変更不要）。react は runtime 単一版 19.2.4（「19.2.14」は @types/react — 併存なしを確認、`pnpm dedupe` 実施）。検証: lint / typecheck / test 99 件 / build / synth すべて green
+- [x] 14. **Renovate 設定（RF-19 / QT-8）** — `renovate.json`（minor/patch グループ化、pnpm workspace 対応）
+  - 実施: `renovate.json` 新設 — config:recommended + minor/patch の単一グループ化 + zod major 凍結（OOS-6 の設計決定を設定として明文化）+ CDK は rangeStrategy: pin（C-2 完全固定維持）
+- [x] 15. **デプロイ 1 コマンド化 + README（RF-20）** — frontend build → cdk deploy の順序を内包するスクリプト、SNS 購読手順 1 行（`AlarmTopicArn` 出力参照 — D-5）
+  - 実施: root package.json に `deploy` script（frontend build → cdk deploy の順序内包 — DEP-O2）。README に「AWS へのデプロイ」節（1 コマンド + 手動 2 ステップ = SNS 購読 1 行・ブランチ保護 + ApiUrl 直接アクセス 403 の説明）
+- [x] 16. **ローカル開発堅牢化（RF-21）** — `dev.ts` の PORT 環境変数化ほか docker-compose / Dockerfile.dev の堅牢化（業務振る舞い変更なし）
+  - 実施: Dockerfile.dev — `|| pnpm install` フォールバック撤去（lockfile 不整合はビルド失敗）+ 非 root（node ユーザー）実行 + `COPY pnpm-lock.yaml` 必須化（glob `*` 撤去）。dev.ts の PORT 環境変数化（既定 3001）は Step 12 で実施済み。README に依存更新後の `docker compose down -v` 手順を追記（P1 残課題①の解消）
+- [x] 17. **文書の現状一致（RF-22①③ + v1 文書 — 範囲 = Q4 回答）** — TodoForm インライン編集記述 / SDK 戦略記述の修正（② PUT 部分更新は v2 文書化済み）
+  - 実施: ① TodoForm 作成専用 + TodoItem インライン編集（application-design.md / components.md / unit-of-work.md の 4 箇所）② PUT 部分更新意味論の注記（application-design.md API 表 — 正式仕様は v2 API-004 へのポインタ）③ SDK 戦略 = externalModules でバンドル除外・ランタイム同梱版依存を明文化（application-design.md 技術決定表）。Q4=b: バナー 1 行を主要 5 ファイル（requirements.md / application-design.md / components.md / unit-of-work.md / infrastructure-design.md）冒頭に追加
+- [x] フェーズ末: 全検証コマンド（lint / typecheck / test / build / synth / audit / E2E）green
+  - lint green（biome 2.4.16 / 51 files）/ typecheck 4 パッケージ green / test **99 件** green（shared 16 / backend 42 / frontend 24 / infrastructure 17）/ build green / synth exit 0（deprecation 0）/ audit exit 0（ignore 0 件）/ E2E 2/2 green（クリーン volume + 新 Dockerfile.dev で再ビルドした compose 環境）
 
 ### 仕上げ — 文書成果物（stage directory）
 
-- [ ] 18. **implementation-map.md** — CMP / ENT / BR / API / QT / CH / IT → ソース・テスト・設定・スクリプトのトレース（テンプレート準拠。Coverage Gaps 含む）
-- [ ] 19. **components.yaml / unit.md の copy-forward 拡張** — infrastructure-design 版をコピーし、既存ブロック不変のまま Implementation-References（実装ファイル / テスト / 設定参照・実装ステータス）のみ追記
-- [ ] 20. state.json の本ステージ status を `artifact-generated` へ更新し、outputs を登録
+- [x] 18. **implementation-map.md** — CMP / ENT / BR / API / QT / CH / IT → ソース・テスト・設定・スクリプトのトレース（テンプレート準拠。Coverage Gaps 含む）
+  - 実施: テンプレート 4 節構成（Source Mapping = CMP×3 / ENT-001 / BR-001〜014 / API-001〜006 / QT / CH-1〜10 / IT-1〜10、Configuration Mapping = UNIT-001 の設定 12 件、Copied Blueprint Expansions、Coverage Gaps 5 件 — CI 実体 / SNS 購読 / レイテンシ実測 / 本番経路実機 / Node 20 EOL）
+- [x] 19. **components.yaml / unit.md の copy-forward 拡張** — infrastructure-design 版をコピーし、既存ブロック不変のまま Implementation-References（実装ファイル / テスト / 設定参照・実装ステータス）のみ追記
+  - 実施: components.yaml = ヘッダに code-generation 追記履歴 + 各 CMP に Implementation-References（Status / Sources / Tests / Config）のみ追加。unit.md = ヘッダ更新（旧ヘッダ保存）+ 末尾に「実装ステータス」節（RF 別状況・検証証跡・残余 3 件）のみ追加。既存ブロックはすべて不変
+- [x] 20. state.json の本ステージ status を `artifact-generated` へ更新し、outputs を登録
+
+### P2 + 仕上げ完了記録（2026-06-10）
+
+- 検証証跡（最終）: `pnpm lint` green（Biome 2.4.16 / 51 files）/ `pnpm typecheck` green（4 パッケージ）/ `pnpm test` green **99 件**（shared 16 / backend 42 / frontend 24 / infrastructure 17 — P1 完了時 84 + 新規 15）/ `pnpm build` green / `cdk synth` exit 0（deprecation 0・Custom::LogRetention 0・動的参照 2・平文 0）/ `pnpm audit --audit-level=high` exit 0（**ignore 0 件**）/ `pnpm test:e2e` **2/2 green**（クリーン volume + 新 Dockerfile.dev 再ビルド環境）
+- 実機確認（compose 環境の backend 直接アクセス）: ヘッダなし 403 / dev ヘッダ 200 / 誤ヘッダ 403（BR-013 フェイルクローズ実証）
+- 新規ファイル: `packages/backend/src/middleware/originVerify.ts`（+ test）、`renovate.json`、stage 文書 3 点（implementation-map.md / components.yaml / unit.md）
+- 変更ファイル: `packages/infrastructure/lib/todo-stack.ts`（CH-1〜10）/ `test/todo-stack.test.ts`（IT-1〜10）/ infrastructure・全パッケージ package.json（CDK 2.258.1・CLI 2.1126.0 / Vitest 3.2.6 / Vite 7.3.5 / plugin-react 5.2.0 / Biome 2.4.16）/ root package.json（deploy script・ignore 削除）/ pnpm-workspace.yaml（ignore 削除）/ biome.json（migrate）/ docker-compose.yml・vite.config.ts・playwright.config.ts・dev.ts（dev 値注入 + PORT）/ Dockerfile.dev（非 root・lockfile 強制）/ index.ts・index.test.ts（ミドルウェア配線）/ App.tsx（useCallback）/ README.md（デプロイ節・volume 手順）/ v1 aidlc-docs 5 ファイル（3 点修正 + バナー）/ pnpm-lock.yaml
+- BP-1 への影響: P2 の新規振る舞い変化は**許容変更 3（直接アクセス 403）のみ**。BT-1〜7 は unit + E2E で不変を確認。意図経路（CloudFront / ローカル proxy）の全 BT 動作は E2E が証明
+- 残課題（orchestrator / 人間へ）: ① P2 変更のコミット + push 後の CI 実体 green 確認 ② ブランチ保護有効化（手動）③ AWS 実デプロイ（`pnpm run deploy`）+ SNS 購読 1 行（手動）④ Node 20 系の保守終了接近（AWS SDK 警告 — 将来 intent）
 
 ## Out of Scope（本ステージで行わないこと）
 

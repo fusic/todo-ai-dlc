@@ -1,5 +1,7 @@
 # Infrastructure Design - infrastructure
 
+> **Note**: 本ドキュメントは v1（初期構築時）の記録です。最新の設計の正は `org-ai-kb/aidlc-docs/intent-001-refactor-todo-app/` 配下を参照してください。
+
 ## Overview
 
 TODO Web アプリケーションの AWS インフラストラクチャ設計。全リソースを単一 CDK スタックで管理。

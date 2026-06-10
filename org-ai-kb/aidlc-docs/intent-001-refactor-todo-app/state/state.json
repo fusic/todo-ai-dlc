@@ -1,7 +1,7 @@
 {
   "intent": "refactor-todo-app",
   "created": "2026-06-09T22:42:42Z",
-  "updated": "2026-06-10T09:21:25Z",
+  "updated": "2026-06-10T11:05:00Z",
   "stages": [
     {
       "stage": "reverse-engineering",
@@ -290,7 +290,7 @@
     {
       "stage": "code-generation",
       "unit": "todo-app",
-      "status": "clarification-provided",
+      "status": "artifact-generated",
       "owner": "aidlc-sw-dev-engineer-agent",
       "reviewer": "aidlc-code-reviewer-agent",
       "reviewIterations": 0,
@@ -350,6 +350,38 @@
         {
           "name": "index.test.ts",
           "locationRelativeToIntentRoot": "../../../packages/backend/src/"
+        },
+        {
+          "name": "originVerify.ts",
+          "locationRelativeToIntentRoot": "../../../packages/backend/src/middleware/"
+        },
+        {
+          "name": "originVerify.test.ts",
+          "locationRelativeToIntentRoot": "../../../packages/backend/src/middleware/"
+        },
+        {
+          "name": "todo-stack.ts",
+          "locationRelativeToIntentRoot": "../../../packages/infrastructure/lib/"
+        },
+        {
+          "name": "todo-stack.test.ts",
+          "locationRelativeToIntentRoot": "../../../packages/infrastructure/test/"
+        },
+        {
+          "name": "renovate.json",
+          "locationRelativeToIntentRoot": "../../../"
+        },
+        {
+          "name": "implementation-map.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "unit.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
         }
       ],
       "contributors": [

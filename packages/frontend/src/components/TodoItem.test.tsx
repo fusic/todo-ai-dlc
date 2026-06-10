@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { Todo } from "@todo-ai-dlc/shared";
 import { describe, expect, it, vi } from "vitest";
-import { TodoItem, createdAtFormatter } from "./TodoItem";
+import { createdAtFormatter, TodoItem } from "./TodoItem";
 
 const mockTodo: Todo = {
 	id: "test-1",

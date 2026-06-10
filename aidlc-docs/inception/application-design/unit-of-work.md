@@ -59,7 +59,7 @@
 - TodoApp（ルート）
 - TodoList（一覧）
 - TodoItem（個別アイテム）
-- TodoForm（作成・編集フォーム）
+- TodoForm（作成専用フォーム — 編集は TodoItem のインライン編集）
 - TodoAPI（API 通信）
 
 **Key Files**:

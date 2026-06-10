@@ -1,5 +1,5 @@
 import type { CreateTodoInput, Todo, UpdateTodoInput } from "@todo-ai-dlc/shared";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { todoApi } from "./api/todoApi";
 import { TodoForm } from "./components/TodoForm";
 import { TodoList } from "./components/TodoList";
@@ -11,11 +11,8 @@ export default function App() {
 	// BR-011（RF-05）: ミューテーション失敗のユーザー可視エラー（読み込みエラーとは別系統で表示）
 	const [actionError, setActionError] = useState<string | null>(null);
 
-	useEffect(() => {
-		loadTodos();
-	}, []);
-
-	async function loadTodos() {
+	// マウント時 1 回のみ実行（Biome 2 useExhaustiveDependencies 対応で useCallback 化 — 振る舞い不変）
+	const loadTodos = useCallback(async () => {
 		try {
 			setLoading(true);
 			setError(null);
@@ -26,7 +23,11 @@ export default function App() {
 		} finally {
 			setLoading(false);
 		}
-	}
+	}, []);
+
+	useEffect(() => {
+		loadTodos();
+	}, [loadTodos]);
 
 	// 失敗を呼び出し元（フォーム / 編集 UI）にも伝える必要があるミューテーションは rethrow し、
 	// 呼び出し元が UI 状態（入力値保持・編集モード維持）を制御する。未処理 rejection は発生させない（BR-011）。

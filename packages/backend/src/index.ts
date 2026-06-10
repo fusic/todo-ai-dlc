@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Logger } from "@aws-lambda-powertools/logger";
 import { Hono } from "hono";
 import { handle } from "hono/aws-lambda";
+import { originVerify } from "./middleware/originVerify";
 import { todosRoute } from "./routes/todos";
 
 // QT-6（RF-10 / D-6）: 構造化ログ — AWS Lambda Powertools Logger（JSON パース可能率 100%）
@@ -36,6 +37,10 @@ app.use("*", async (c, next) => {
 		requestId: c.get("requestId"),
 	});
 });
+
+// オリジン検証（BR-013 / RF-16 / QT-4 — 常時有効・フェイルクローズ）。
+// アクセスログの後段に置き、403 拒否もアクセスログに記録する（直接アクセス試行の観測性）。
+app.use("*", originVerify);
 
 // Global error handler（BR-012 / RF-11）: クライアントには固定の汎用 500 ボディのみ。
 // stack を含むエラー詳細はサーバー側の構造化ログにのみ記録する（調査可能性と非開示の両立）。

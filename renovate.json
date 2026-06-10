@@ -1,0 +1,26 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"description": "依存自動更新（RF-19 / QT-8）— CI の pnpm audit（D-3）と連動し、ignore エントリの解消を担う。pnpm workspace はネイティブ対応",
+	"extends": ["config:recommended"],
+	"timezone": "Asia/Tokyo",
+	"labels": ["dependencies"],
+	"packageRules": [
+		{
+			"description": "minor / patch はグループ化して PR ノイズを抑制（nfr-design Tech Stack — RF-19 受入基準）",
+			"matchUpdateTypes": ["minor", "patch"],
+			"groupName": "all non-major dependencies",
+			"groupSlug": "all-minor-patch"
+		},
+		{
+			"description": "zod v4 は対象外（OOS-6 — エラーレスポンス形状 = API 契約への波及リスク。将来 intent で設計）",
+			"matchPackageNames": ["zod"],
+			"matchUpdateTypes": ["major"],
+			"enabled": false
+		},
+		{
+			"description": "CDK は完全固定宣言を維持（C-2 / SECURITY-10）— 更新 PR でもピン版のまま置換する",
+			"matchPackageNames": ["aws-cdk", "aws-cdk-lib"],
+			"rangeStrategy": "pin"
+		}
+	]
+}

@@ -37,6 +37,9 @@ docker compose down          # コンテナ停止
 docker compose down -v       # コンテナ停止 + データリセット（volumes 削除）
 ```
 
+> 依存パッケージを追加・更新した後は、`docker compose down -v` で node_modules ボリュームを破棄してから
+> `docker compose up --build` で再作成してください（named volume に古い依存が残るため）。
+
 ### Windows（WSL2）での開発
 
 WSL2 上で利用する場合、以下の点に注意してください：
@@ -87,7 +90,22 @@ docker compose down            # 終了後
 2. 「Require status checks to pass before merging」を有効化し、CI の 6 ジョブ（lint / typecheck / test / synth / audit / e2e）を required checks に指定
 3. 「Require a pull request before merging」を有効化（main への直接 push を遮断）
 
-`pnpm audit` で修正不能な上流 advisory が出た場合は、`pnpm-workspace.yaml` / `package.json` の `auditConfig.ignoreGhsas` に理由コメント付きで個別 ignore し、依存更新で解消され次第削除します。
+`pnpm audit` で修正不能な上流 advisory が出た場合は、`pnpm-workspace.yaml` の `auditConfig.ignoreGhsas` に理由コメント付きで個別 ignore し、依存更新で解消され次第削除します（現在の ignore は 0 件）。依存更新 PR は Renovate（`renovate.json` — minor/patch グループ化）が自動生成します。
+
+## AWS へのデプロイ（RF-20）
+
+frontend build → cdk deploy の順序制約（CDK が `frontend/dist` を参照）はルートの deploy script が内包しています。AWS 認証情報（ap-northeast-1）を設定のうえ 1 コマンドで実行できます：
+
+```bash
+pnpm run deploy   # = frontend build && cdk deploy（初回は CDK bootstrap が必要）
+```
+
+デプロイ後の手動ステップは次の 2 つだけです：
+
+1. **アラーム通知の購読（1 行）**: `aws sns subscribe --topic-arn <AlarmTopicArn 出力値> --protocol email --notification-endpoint <あなたのメールアドレス>` を実行し、届いた確認メールを承認します（CloudWatch アラーム 4 種の通知先 — トピック ARN は deploy 出力の `AlarmTopicArn`）
+2. **ブランチ保護の有効化**（上記 CI 節参照）
+
+なお `ApiUrl` 出力（execute-api URL)への直接アクセスはオリジン検証により全操作 403 です（意図経路は CloudFront のみ。403 になることの確認用に出力を維持しています）。
 
 ## プロジェクト構成
 
