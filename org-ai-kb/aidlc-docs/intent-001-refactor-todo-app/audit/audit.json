@@ -72,6 +72,18 @@
       "stage": "functional-design",
       "presented": "unit todo-app の成果物サマリー（entities.yaml ENT-001 / rules.yaml BR-001〜014 / api-specification.md API-001〜006 + RF-22② 文書化 / functional-spec.md WF-001〜007 / copy-forward 3 件）と reviewer 判定 READY（実コード突合済み、非ブロッキング指摘 F-1〜F-3）、process-checker PASS",
       "decision": "承認。指摘 3 件は成果物記録のまま nfr-design へ進む"
+    },
+    {
+      "timestamp": "2026-06-10T07:46:03Z",
+      "stage": "nfr-design",
+      "presented": "unit todo-app の owner plan.md（Step 1〜7、nfr-specification.md + copy-forward 3 件、F-2/F-3 処置の織込み）と clarification questions Q1-Q7（RF-16 経路/Secret 管理、audit 閾値、アラーム統計/通知、構造化ログ、E2E フレームワーク）",
+      "decision": "plan 承認。Q1: a（ヘッダ注入方式・検証ミドルウェア常時有効）、Q2: a（Secrets Manager 自動生成 +$0.40/月）、Q3: a（audit-level=high + ignoreCves 運用）、Q4: a（Lambda Duration p95>500ms 主アラーム + API GW Latency p99 補助）、Q5: a（SNS トピックのみ CDK 作成・購読は手動）、Q6: a（Lambda Powertools Logger）、Q7: a（Playwright）"
+    },
+    {
+      "timestamp": "2026-06-10T08:05:38Z",
+      "stage": "nfr-design",
+      "presented": "unit todo-app の成果物サマリー（nfr-specification.md QT-1〜9 / Tech Stack / 8 パターン / Constraints C-1〜9、copy-forward 3 件 blueprint identity 検証済み）と reviewer 判定 READY（実コード突合済み、非ブロッキング指摘 N-1〜N-6）、process-checker PASS",
+      "decision": "承認。指摘 6 件は成果物記録のまま infrastructure-design へ進む"
     }
   ]
 }

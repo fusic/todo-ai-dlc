@@ -1,7 +1,7 @@
 {
   "intent": "refactor-todo-app",
   "created": "2026-06-09T22:42:42Z",
-  "updated": "2026-06-10T06:13:53Z",
+  "updated": "2026-06-10T08:05:38Z",
   "stages": [
     {
       "stage": "reverse-engineering",
@@ -218,16 +218,45 @@
     {
       "stage": "nfr-design",
       "unit": "todo-app",
-      "status": "pending",
+      "status": "complete",
       "owner": "aidlc-systems-architect-agent",
       "reviewer": "aidlc-architecture-reviewer-agent",
       "reviewIterations": 0,
-      "outputs": []
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "nfr-specification.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "unit.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "api-specification.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        }
+      ]
     },
     {
       "stage": "infrastructure-design",
       "unit": "todo-app",
-      "status": "pending",
+      "status": "plan-and-clarify",
       "owner": "aidlc-systems-architect-agent",
       "reviewer": "aidlc-architecture-reviewer-agent",
       "reviewIterations": 0,
