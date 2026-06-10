@@ -1,7 +1,7 @@
 {
   "intent": "refactor-todo-app",
   "created": "2026-06-09T22:42:42Z",
-  "updated": "2026-06-10T01:20:01Z",
+  "updated": "2026-06-10T06:13:53Z",
   "stages": [
     {
       "stage": "reverse-engineering",
@@ -168,11 +168,52 @@
     {
       "stage": "functional-design",
       "unit": "todo-app",
-      "status": "pending",
+      "status": "complete",
       "owner": "aidlc-systems-architect-agent",
       "reviewer": "aidlc-architecture-reviewer-agent",
       "reviewIterations": 0,
-      "outputs": []
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "entities.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "rules.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "api-specification.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "functional-spec.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "unit.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "unit-story-map.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        }
+      ]
     },
     {
       "stage": "nfr-design",

@@ -60,6 +60,18 @@
       "stage": "units-generation",
       "presented": "units 成果物サマリー（UNIT-001 todo-app 単一ユニット、build 順序引き継ぎ、story map 29 行）と reviewer 判定 READY",
       "decision": "承認。INCEPTION フェーズ完了。construction は次セッション以降で実施（per-unit ディレクトリ作成済み）"
+    },
+    {
+      "timestamp": "2026-06-10T05:55:15Z",
+      "stage": "functional-design",
+      "presented": "unit todo-app の owner plan.md（Step 0〜9、7 成果物、contract-design/story-generation 未実施の Artifact Resolution fallback）と clarification questions Q1-Q5。あわせて CONSTRUCTION 開始前のベースライン（test 38/45 pass: infrastructure 7 件ロード不能、lint red、frontend build red）をチャットで共有",
+      "decision": "plan 承認。Q1: a（RF-06 は API 側ソート、第 2 キー id 降順）、Q2: a（CORS 両方撤去・0 箇所、E2E 検証を条件）、Q3: a（テスト境界値はリテラル維持）、Q4: a（frontend は型+定数のみ、schema は CMP-002 専用）、Q5: a（CMP-003 はビルドなし・ソース直接参照）"
+    },
+    {
+      "timestamp": "2026-06-10T06:13:53Z",
+      "stage": "functional-design",
+      "presented": "unit todo-app の成果物サマリー（entities.yaml ENT-001 / rules.yaml BR-001〜014 / api-specification.md API-001〜006 + RF-22② 文書化 / functional-spec.md WF-001〜007 / copy-forward 3 件）と reviewer 判定 READY（実コード突合済み、非ブロッキング指摘 F-1〜F-3）、process-checker PASS",
+      "decision": "承認。指摘 3 件は成果物記録のまま nfr-design へ進む"
     }
   ]
 }

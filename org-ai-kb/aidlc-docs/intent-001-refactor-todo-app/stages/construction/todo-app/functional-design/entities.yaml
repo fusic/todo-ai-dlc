@@ -1,0 +1,86 @@
+# entities.yaml — functional-design / unit: todo-app (UNIT-001)
+# Owner: aidlc-systems-architect-agent / 2026-06-10
+#
+# source of truth: エンティティスキーマは本ファイルが正（functional-spec.md の ER 図は本ファイルから導出）。
+# 上流保存: units-generation 版 components.yaml の ENT-001（属性 6 件）を ID・名称・所有（CMP-002）不変のまま詳細化
+#           （blueprint identity 維持）。
+# 決定の反映: Q1=a（一覧順序保証は CMP-002 / 第 2 ソートキー id 降順）、
+#             Q4=a（制約定数の単一ソースは CMP-003・検証の強制点は CMP-002）— questions.md 回答済み。
+# 規律: technology-agnostic。ULID / ISO 8601 は実装技術ではなく形式仕様として記載。永続化製品名は記載しない
+#       （現状事実は RE api-documentation.md 参照）。
+
+- id: ENT-001
+  name: "Todo"
+  component-id: CMP-002
+  component-name: "Todo Backend API"
+  description: >-
+    タスク 1 件を表す本システム唯一のビジネスエンティティ。ライフサイクル（生成規則・検証・更新・削除・永続化）の
+    強制点は CMP-002（domain-design Q2=a）。形状・制約値の定義の単一ソースは CMP-003（RF-03）。
+  source:
+    requirements:
+      - FR-001
+      - FR-002
+      - FR-003
+      - FR-004
+      - RF-03   # 形状・制約定数の単一ソース化
+      - RF-06   # 一覧順序保証（本ステージ Q1=a で CMP-002 着地に確定）
+      - RF-22   # ②部分更新意味論の文書化（updatedAt の更新規則に反映）
+    stories:    # story fallback: unit-story-map.md（BT を story 相当として参照）
+      - BT-1
+      - BT-2
+      - BT-3
+      - BT-4
+      - BT-5
+      - BT-6
+      - BT-7   # ヘルスチェックはエンティティに触れないが、unit の保持対象として参照のみ記録
+  attributes:
+    - name: id
+      type: string
+      required: true
+      unique: true
+      constraints: >-
+        ULID 形式（26 文字、辞書順 = 生成時刻順）。サーバー（CMP-002）が生成し、クライアントは指定できない（BR-003）。
+        永続化の一意キー。一覧順序の第 2 ソートキー（降順 — BR-010。ULID の辞書順性により createdAt 降順と単調整合）。
+        作成後は不変。
+    - name: title
+      type: string
+      required: true
+      min: 1
+      max: 200
+      constraints: >-
+        最大値 200 は CMP-003 の共有定数が単一定義（RF-03。プロダクションコード内のリテラルは CMP-003 の 1 箇所のみ。
+        テストコード内の境界値リテラルは独立検証点として許容 — 本ステージ Q3=a）。
+        検証の強制点は CMP-002 の API 境界のみ（BR-001）。CMP-001 の文字数補助は UX 目的であり防衛線ではない（Q4=a）。
+    - name: description
+      type: string
+      required: false
+      min: 0
+      max: 1000
+      constraints: >-
+        任意項目。最大値 1000 は CMP-003 の共有定数が単一定義（title と同じ規律 — RF-03 / Q3=a / Q4=a）。
+        検証の強制点は CMP-002（BR-002）。
+    - name: completed
+      type: boolean
+      required: true
+      default: false
+      constraints: >-
+        作成時は false 固定で CMP-002 が初期化する（BR-004）。クライアントの作成入力では指定不可
+        （作成入力スキーマに completed は存在しない）。更新入力でのみ変更できる。
+    - name: createdAt
+      type: timestamp (ISO 8601 文字列)
+      required: true
+      constraints: >-
+        作成時に CMP-002 が付与（BR-005）。作成後は不変。一覧順序の第 1 ソートキー（降順 — BR-010）。
+        UI の表示要素（FR-002 / RF-08 — 人間可読形式での表示は CMP-001 の責務）。
+    - name: updatedAt
+      type: timestamp (ISO 8601 文字列)
+      required: true
+      constraints: >-
+        作成時は createdAt と同時に付与し、更新が成功するたびに CMP-002 が更新する（BR-005）。
+        空オブジェクトでの更新（有効入力 — BR-006）でも更新される。
+  constraints:
+    - "一覧（API-002）の返却順は createdAt 降順、同一 createdAt の tie は id 降順で決定的に並ぶ。順序保証は API コントラクトの一部（BR-010 — Q1=a / RF-06）"
+    - "形状・制約値（200/1000）の定義の単一ソースは CMP-003。CMP-001 / CMP-002 は重複定義を持たない（RF-03）"
+    - "ライフサイクルの全規則（BR-001〜BR-010）の強制点は CMP-002 のみ。CMP-001 は防衛線ではない（domain-design Q2=a / 本ステージ Q4=a）"
+    - "削除は物理削除（論理削除状態を持たない — functional-spec.md SM-001 の終端状態）"
+  relationships: []   # 単一エンティティ。リレーションなし（RE api-documentation.md と一致）
