@@ -47,6 +47,9 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # DEP-O2: infrastructure の unit テストは TodoStack を実体化するため、
+      # synth ジョブと同様に Source.asset(frontend/dist) の実在が前提になる
+      - run: pnpm --filter @todo-ai-dlc/frontend build
       - run: pnpm test
 
   synth:
