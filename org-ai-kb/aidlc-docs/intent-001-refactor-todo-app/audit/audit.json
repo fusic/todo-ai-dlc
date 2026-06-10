@@ -84,6 +84,18 @@
       "stage": "nfr-design",
       "presented": "unit todo-app の成果物サマリー（nfr-specification.md QT-1〜9 / Tech Stack / 8 パターン / Constraints C-1〜9、copy-forward 3 件 blueprint identity 検証済み）と reviewer 判定 READY（実コード突合済み、非ブロッキング指摘 N-1〜N-6）、process-checker PASS",
       "decision": "承認。指摘 6 件は成果物記録のまま infrastructure-design へ進む"
+    },
+    {
+      "timestamp": "2026-06-10T08:14:14Z",
+      "stage": "infrastructure-design",
+      "presented": "unit todo-app の owner plan.md（Step 1〜8、上流確定パラメータ P-1〜P-7 の再オープンなし、設計射程 9 項目/委譲 3 項目）と clarification questions Q1-Q2（ApiUrl CfnOutput の扱い、旧ロググループの扱い）",
+      "decision": "plan 承認。Q1: a（ApiUrl 維持 + 説明文を 403 明記に更新）、Q2: a（旧ロググループ残置許容 + 注記のみ）"
+    },
+    {
+      "timestamp": "2026-06-10T08:33:48Z",
+      "stage": "infrastructure-design",
+      "presented": "unit todo-app の成果物サマリー（infrastructure-specification.md: 変更明細 CH-1〜CH-10 行参照付き / インフラテスト IT-1〜IT-10 / 命名確定 x-origin-verify・ORIGIN_VERIFY_SECRET、copy-forward 2 件削除 0 行）と reviewer 判定 READY（CH 行参照を実コード全件照合・完全一致、非ブロッキング指摘 I-1〜I-5）、process-checker PASS",
+      "decision": "承認。指摘 5 件は成果物記録のまま code-generation へ進む"
     }
   ]
 }
