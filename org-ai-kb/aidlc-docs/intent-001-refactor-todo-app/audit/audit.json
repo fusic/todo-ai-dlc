@@ -1,0 +1,65 @@
+{
+  "intent": "refactor-todo-app",
+  "entries": [
+    {
+      "timestamp": "2026-06-09T22:40:00Z",
+      "stage": "workflow-composition",
+      "presented": "実行方式の選択（v2 をソースから直接実行 / v1 のまま / Kiro ビルド）とリファクタリング対象の確認（アプリコード / 教材構造移行 / 両方）",
+      "decision": "v2 をソースから直接実行、対象は packages/ 配下の TODO アプリケーションコード"
+    },
+    {
+      "timestamp": "2026-06-09T23:06:18Z",
+      "stage": "workflow-composition",
+      "presented": "リファクタリング目的の質問、6ステージ案（レビューあり、story-generation/wireframe-design/contract-design はスキップ）、autonomy モードの選択。インフラ刷新が目的に含まれる場合は nfr-design / infrastructure-design を追加すると提示",
+      "decision": "目的: コード品質・保守性 / アーキテクチャ改善 / テスト・型安全強化 / インフラ含む全面刷新（全選択）。ワークフロー承認。autonomy=supervised。目的にインフラ刷新が含まれるため nfr-design / infrastructure-design を追加した 8 ステージ構成で確定"
+    },
+    {
+      "timestamp": "2026-06-09T23:30:00Z",
+      "stage": "reverse-engineering",
+      "presented": "owner の plan.md（6成果物・14 substep）と clarification questions Q1-Q3",
+      "decision": "plan 承認。Q1: b（6成果物、component-inventory 省略）、Q2: c（観測事項＋リファクタリング提案まで記述 — 推奨 b を上書き）、Q3: c（v1 成果物との軽量ドリフト確認込み）"
+    },
+    {
+      "timestamp": "2026-06-09T23:36:17Z",
+      "stage": "reverse-engineering",
+      "presented": "RE 成果物サマリー（6成果物、主要 Observations、v1 ドリフト 4 件、リファクタリング提案）と reviewer 判定 READY（軽微指摘 R-1〜R-4）",
+      "decision": "承認。軽微指摘は成果物に記録済みのまま requirements-analysis へ進む"
+    },
+    {
+      "timestamp": "2026-06-10T00:05:00Z",
+      "stage": "requirements-analysis",
+      "presented": "owner の plan.md（12 steps、validate-and-augment、RF-xx ID 体系・トレーサビリティ表）と clarification questions Q1-Q4",
+      "decision": "plan 承認。Q1: c（ドリフト件別判断 — BO-O3 のみ実装を正、他 3 件は実装修正）、Q2: b（後方互換範囲で不具合素地修正）、Q3: c（本格強化、WAF 除外）、Q4: c（安全な改修順序 P0=検証ゲート+コントラクト一元化）"
+    },
+    {
+      "timestamp": "2026-06-10T00:20:00Z",
+      "stage": "requirements-analysis",
+      "presented": "requirements.md サマリー（RF 22 件 P0x3/P1x10/P2x9、validate 結果、OOS 10 件）、reviewer 判定 READY、refine で追加された BP-1 許容変更 4（複合ケース 404→400）と 5（CORS ヘッダ変更）+ 前提 A-1 の明示確認、A-4 CI 基盤の確認",
+      "decision": "承認。許容変更 4・5 と A-1 を明示承認。A-4 は GitHub Actions で確定。domain-design へ進む"
+    },
+    {
+      "timestamp": "2026-06-10T00:30:00Z",
+      "stage": "domain-design",
+      "presented": "owner の plan.md（3 コンポーネント案 CMP-001/002/003、RF 全件トレーサビリティ方針）と clarification questions Q1-Q3",
+      "decision": "plan 承認。Q1: a（現状境界保持 + RF-03）、Q2: a（shared=定義の単一ソース、Todo 所有=backend）、Q3: a（非コンポーネント要素節で記録し units-generation へ引継ぎ）"
+    },
+    {
+      "timestamp": "2026-06-10T01:05:00Z",
+      "stage": "domain-design",
+      "presented": "components サマリー（CMP-001/002/003、ENT-001、RF 22 件着地、申し送り 8 件）と reviewer 判定 READY",
+      "decision": "承認。units-generation へ進む"
+    },
+    {
+      "timestamp": "2026-06-10T01:30:00Z",
+      "stage": "units-generation",
+      "presented": "owner の plan.md（copy-forward + 3 成果物生成、7 ステップ）と clarification questions Q1-Q3（unit 構成・非コンポーネント帰属・順序表現）",
+      "decision": "plan 承認。Q1: a（単一ユニット todo-app、construction 1 周）、Q2: a（非コンポーネント RF も同 unit 帰属）、Q3: a（story map にフェーズ列）"
+    },
+    {
+      "timestamp": "2026-06-10T01:20:01Z",
+      "stage": "units-generation",
+      "presented": "units 成果物サマリー（UNIT-001 todo-app 単一ユニット、build 順序引き継ぎ、story map 29 行）と reviewer 判定 READY",
+      "decision": "承認。INCEPTION フェーズ完了。construction は次セッション以降で実施（per-unit ディレクトリ作成済み）"
+    }
+  ]
+}
