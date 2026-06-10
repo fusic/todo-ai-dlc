@@ -17,6 +17,9 @@ importers:
 
   packages/backend:
     dependencies:
+      '@aws-lambda-powertools/logger':
+        specifier: ^2.33.1
+        version: 2.33.1
       '@aws-sdk/client-dynamodb':
         specifier: ^3.1065.0
         version: 3.1065.0
@@ -178,6 +181,20 @@ packages:
 
   '@aws-crypto/util@5.2.0':
     resolution: {integrity: sha512-4RkU9EsI6ZpBve5fseQlGNUWKMa1RLPQ1dnjnQoe07ldfIzcsGb5hC5W0Dm7u423KWzawlrpbjXBrXCEv9zazQ==}
+
+  '@aws-lambda-powertools/commons@2.33.1':
+    resolution: {integrity: sha512-edzvz+zqBl8p9J2Cgo1rFmhd+3ANqr0PQDqowElS3CJ10ioHN2wUYiANGxfalcgbB8ulZxGkRbK3wvEEziV/5w==}
+
+  '@aws-lambda-powertools/logger@2.33.1':
+    resolution: {integrity: sha512-DDnKcv2zghslh2AtrVsa4wHcAuI5M7+JlX65CgdXLk2th0Nr0octJQq0f4Bnp+DzuwFynmH4GJqsBe33rZapAw==}
+    peerDependencies:
+      '@aws-lambda-powertools/jmespath': 2.33.1
+      '@middy/core': 4.x || 5.x || 6.x || 7.x
+    peerDependenciesMeta:
+      '@aws-lambda-powertools/jmespath':
+        optional: true
+      '@middy/core':
+        optional: true
 
   '@aws-sdk/client-dynamodb@3.1065.0':
     resolution: {integrity: sha512-Qf2iffOSoJzShRnP/RKcNEcRIxTryzlf81pQhxXeEgWUUnBAuPLH4qBD3I1mlghdNcrspZM6jGT4CUNt6UtUbw==}
@@ -2265,6 +2282,15 @@ snapshots:
       '@aws-sdk/types': 3.973.12
       '@smithy/util-utf8': 2.3.0
       tslib: 2.8.1
+
+  '@aws-lambda-powertools/commons@2.33.1':
+    dependencies:
+      '@aws/lambda-invoke-store': 0.2.4
+
+  '@aws-lambda-powertools/logger@2.33.1':
+    dependencies:
+      '@aws-lambda-powertools/commons': 2.33.1
+      '@aws/lambda-invoke-store': 0.2.4
 
   '@aws-sdk/client-dynamodb@3.1065.0':
     dependencies:

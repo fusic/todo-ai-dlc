@@ -71,15 +71,31 @@
 
 ### P1 — backend / frontend 実装品質（RF-04〜13）
 
-- [ ] 4. **CMP-002: zod 強制 + 不正 JSON 400（RF-04 / BR-008 / BR-009）** — handler の評価順序を「ボディ解釈 → 入力検証 → 書込」に固定。JSON 解釈不能は 400。テスト: 不正 JSON 400 / 有効入力の応答不変
-- [ ] 5. **CMP-002: 条件付き書込（RF-07 / BR-007 / QT-9）** — repository の update / delete を `ConditionExpression: attribute_exists(id)` の単一呼出に変更（DynamoDB 呼出 各 1 回）。404 は条件失敗例外で判定。テスト: 不存在 id の PUT が新規作成せず 404 / 複合ケース（不正ボディ × 不存在 id）は 400 優先（BR-009）/ 呼出回数 1 回
-- [ ] 6. **CMP-002: 一覧順序保証（RF-06 / BR-010）** — API-002 応答生成時に createdAt 降順・tie は id 降順でソート。テスト: 順序 + tie-break の決定性
-- [ ] 7. **CMP-002: 構造化ログ（RF-10/11 / QT-6 / D-6）** — `@aws-lambda-powertools/logger` 導入、hono/logger 置換。必須フィールド method / path / status / requestId、エラー時 stack（500 応答ボディは不変 — BR-012）。テスト: ログの JSON パース + 必須フィールド assert
-- [ ] 8. **CMP-002: CORS 撤去 API 側（RF-12 / functional Q2=a）** — `hono/cors` の import と `app.use("*", cors())` を削除（IaC 側 corsPreflight は Step 11 / CH-4）
-- [ ] 9. **CMP-001: RF-05 / RF-08 / RF-09** — ミューテーション失敗のユーザー可視エラー表示 + 未処理 rejection 解消（BR-011）/ createdAt の人間可読表示（WF-002 表示要素 3 点）/ 未使用 `fetchTodo` 削除（API-003 エンドポイント自体は維持）。テスト: 失敗時エラー表示 / createdAt 表示
-- [ ] 10. **CMP-001: build 二重出力解消（RF-13）** — `build` を `vite build` のみに（`tsc` は typecheck へ分離 — CI が実行）
-- [ ] 各ステップ末: `pnpm lint` / `pnpm test` green。フェーズ末: `pnpm build` + E2E 全 green（BP-1 確認）
-- [ ] （Q3=a の場合）**P1 完了報告 — 停止**
+- [x] 4. **CMP-002: zod 強制 + 不正 JSON 400（RF-04 / BR-008 / BR-009）** — handler の評価順序を「ボディ解釈 → 入力検証 → 書込」に固定。JSON 解釈不能は 400。テスト: 不正 JSON 400 / 有効入力の応答不変
+  - 実施: `todoHandler.ts` に `readJsonBody` ヘルパー（try/catch → 400 `{error: "Invalid JSON body"}`）。create / update とも「ボディ解釈 → 検証 → 書込」順に固定。テスト 2 件追加（POST / PUT の不正 JSON 400 + 書込未到達）。lint green / backend 23 件 green
+- [x] 5. **CMP-002: 条件付き書込（RF-07 / BR-007 / QT-9）** — repository の update / delete を `ConditionExpression: attribute_exists(id)` の単一呼出に変更（DynamoDB 呼出 各 1 回）。404 は条件失敗例外で判定。テスト: 不存在 id の PUT が新規作成せず 404 / 複合ケース（不正ボディ × 不存在 id）は 400 優先（BR-009）/ 呼出回数 1 回
+  - 実施: repository `update → Todo | null` / `delete → boolean`（条件失敗を name=`ConditionalCheckFailedException` で判定、他例外は伝播 = BR-012）。handler は findById 事前読取を撤去し条件失敗 → 404。テスト追加: 複合ケース 400 優先 / 空オブジェクト受理（BR-006）/ ConditionExpression + 呼出 1 回 / 条件失敗 null・false / 非条件例外の rethrow。lint green / backend 31 件 green / typecheck green
+- [x] 6. **CMP-002: 一覧順序保証（RF-06 / BR-010）** — API-002 応答生成時に createdAt 降順・tie は id 降順でソート。テスト: 順序 + tie-break の決定性
+  - 実施: `todoHandler.list` に `sortForList`（非破壊コピー + createdAt 降順・tie id 降順）。テスト 2 件追加（降順 / tie-break 決定性 — 走査順を変えて同一結果を assert）。lint green / backend 33 件 green
+- [x] 7. **CMP-002: 構造化ログ（RF-10/11 / QT-6 / D-6）** — `@aws-lambda-powertools/logger` 導入、hono/logger 置換。必須フィールド method / path / status / requestId、エラー時 stack（500 応答ボディは不変 — BR-012）。テスト: ログの JSON パース + 必須フィールド assert
+  - 実施: `@aws-lambda-powertools/logger@^2.33.1` を backend dependencies に追加（esbuild バンドル対象 — externalModules は @aws-sdk/* のみ）。index.ts: hono/logger と console.error を撤去し、アクセスログ middleware（requestId = Lambda awsRequestId / ローカル UUID、Hono Variables 経由）+ onError の構造化エラーログ（error オブジェクト → Powertools が name/message/stack を整形）。`index.test.ts` 新設 3 件（JSON パース + 必須フィールド / 404 の status 記録 / 500 固定ボディ + サーバー側 stack — POWERTOOLS_DEV で console spy）。エラー時はアクセスログ（status 500）とエラーログ（stack 付き）の両方が出ることを実測確認。lint green / backend 36 件 green / typecheck green
+- [x] 8. **CMP-002: CORS 撤去 API 側（RF-12 / functional Q2=a）** — `hono/cors` の import と `app.use("*", cors())` を削除（IaC 側 corsPreflight は Step 11 / CH-4）
+  - 実施: index.ts から cors を撤去し「CORS 0 箇所」の根拠コメントを記載。回帰ロックとして Origin ヘッダ付きリクエストでも `access-control-allow-origin` が出ないことを assert するテスト 1 件追加。lint green / backend 37 件 green
+- [x] 9. **CMP-001: RF-05 / RF-08 / RF-09** — ミューテーション失敗のユーザー可視エラー表示 + 未処理 rejection 解消（BR-011）/ createdAt の人間可読表示（WF-002 表示要素 3 点）/ 未使用 `fetchTodo` 削除（API-003 エンドポイント自体は維持）。テスト: 失敗時エラー表示 / createdAt 表示
+  - 実施: App.tsx に `actionError` 状態 + `app-action-error` バナー（閉じるボタン付き、読み込みエラーと別系統）。create/update は rethrow（TodoForm = 入力値保持 / TodoItem = 編集モード維持を各自 catch）、toggle/delete は App で握って表示のみ（fire-and-forget 呼出のため rethrow しない設計 — 未処理 rejection 0）。TodoItem に `createdAt` 表示（`Intl.DateTimeFormat("ja-JP")` を `createdAtFormatter` として export — TZ 非依存テスト）。todoApi から `fetchTodo` 削除。テスト 7 件追加（App 失敗 4 / TodoForm 保持 1 / TodoItem 編集維持 + createdAt 2）。lint green / frontend 24 件 green / typecheck green
+- [x] 10. **CMP-001: build 二重出力解消（RF-13）** — `build` を `vite build` のみに（`tsc` は typecheck へ分離 — CI が実行）
+  - 実施: frontend package.json の `build` から `tsc &&` を除去（型検査は既存 `typecheck` スクリプト = CI typecheck ジョブが担保）。dist に Vite 出力のみ存在することを確認。pnpm build green
+- [x] 各ステップ末: `pnpm lint` / `pnpm test` green。フェーズ末: `pnpm build` + E2E 全 green（BP-1 確認）
+- [x] （Q3=a の場合）**P1 完了報告 — 停止**
+
+#### P1 完了記録（2026-06-10）
+
+- 検証証跡（最終）: `pnpm lint` green（biome 47 files）/ `pnpm test` green **84 件**（shared 16 / backend 37 / frontend 24 / infrastructure 7 — P0 完了時 61 + 新規 23）/ `pnpm typecheck` green（4 パッケージ）/ `pnpm build` green / `pnpm --filter @todo-ai-dlc/infrastructure synth` exit 0 / `pnpm audit --audit-level=high` exit 0 / `pnpm test:e2e` **2/2 green**（chromium + DynamoDB Local — BT-1〜5 + BT-7）
+- 実環境証跡: docker compose 環境の backend 実ログで Powertools JSON（level/service/method/path/status/requestId）を確認。E2E 実行時の PUT/DELETE が条件付き書込経由で 200/204
+- 新規ファイル: `packages/backend/src/index.test.ts`（構造化ログ + CORS 0 箇所の回帰テスト 4 件）
+- 変更ファイル: backend（index.ts = Powertools ログ/onError/CORS 撤去、handlers/todoHandler.ts = readJsonBody/sortForList/条件失敗 404、repositories/todoRepository.ts = ConditionExpression、package.json = @aws-lambda-powertools/logger 追加、todoHandler.test.ts / todoRepository.test.ts 拡充）、frontend（App.tsx = actionError バナー、TodoForm.tsx / TodoItem.tsx = 失敗時 UI 保持 + createdAt 表示、api/todoApi.ts = fetchTodo 削除、package.json = build から tsc 分離、App/TodoForm/TodoItem テスト拡充）、pnpm-lock.yaml
+- BP-1 への影響: 振る舞い変化は承認済み許容変更のみ — ①不正 JSON 500→400（許容変更 1）②一覧順序保証（同 1）③複合ケース 404→400（同 4）④CORS ヘッダ消失（同 5）。BT-1〜7 は unit + E2E で不変を確認
+- 残課題（orchestrator / 人間へ）: ① docker compose の node_modules named volume は依存追加後に `docker compose down -v` での再作成が必要（今回実測 — CI は毎回新規 runner のため影響なし。README 追記は P2 RF-21 で検討） ② AWS SDK が node 20 への警告（>=22 推奨）を出力 — C-7 確認（P2 Step 13）の材料 ③ IaC 側 corsPreflight 削除（CH-4）は P2 Step 11
 
 ### P2 — 基盤（RF-14〜22）
 

@@ -54,4 +54,21 @@ describe("TodoForm", () => {
 			expect(screen.getByTestId("todo-form-title-input")).toHaveValue("");
 		});
 	});
+
+	// BR-011（RF-05）: 失敗時は未処理 rejection を発生させず、再送できるよう入力値を保持する
+	it("keeps input values and re-enables submit when onSubmit rejects", async () => {
+		const onSubmit = vi.fn().mockRejectedValueOnce(new Error("Internal server error"));
+		render(<TodoForm onSubmit={onSubmit} />);
+
+		fireEvent.change(screen.getByTestId("todo-form-title-input"), {
+			target: { value: "Will fail" },
+		});
+		fireEvent.click(screen.getByTestId("todo-form-submit-button"));
+
+		await vi.waitFor(() => {
+			expect(screen.getByTestId("todo-form-submit-button")).toBeEnabled();
+		});
+		expect(onSubmit).toHaveBeenCalledOnce();
+		expect(screen.getByTestId("todo-form-title-input")).toHaveValue("Will fail");
+	});
 });

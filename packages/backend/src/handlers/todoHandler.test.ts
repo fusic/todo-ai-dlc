@@ -54,6 +54,38 @@ describe("todoHandler", () => {
 			expect(res.status).toBe(200);
 			expect(await res.json()).toEqual([]);
 		});
+
+		// BR-010（RF-06）: createdAt 降順 — 永続化層の走査順に依存しない
+		it("should return todos sorted by createdAt descending", async () => {
+			const oldest = { id: "01A", title: "oldest", createdAt: "2026-01-01T00:00:00.000Z" };
+			const newest = { id: "01C", title: "newest", createdAt: "2026-03-01T00:00:00.000Z" };
+			const middle = { id: "01B", title: "middle", createdAt: "2026-02-01T00:00:00.000Z" };
+			mockRepository.findAll.mockResolvedValueOnce([oldest, newest, middle]);
+
+			const res = await app.request("/api/todos");
+			expect(res.status).toBe(200);
+			const body = await res.json();
+			expect(body.map((t: { id: string }) => t.id)).toEqual(["01C", "01B", "01A"]);
+		});
+
+		// BR-010: 同一 createdAt（ミリ秒一致）の tie は id 降順で決定的
+		it("should break createdAt ties by id descending (deterministic order)", async () => {
+			const sameTime = "2026-01-15T00:00:00.000Z";
+			const a = { id: "01AAA", title: "a", createdAt: sameTime };
+			const b = { id: "01BBB", title: "b", createdAt: sameTime };
+			const c = { id: "01CCC", title: "c", createdAt: sameTime };
+			mockRepository.findAll.mockResolvedValueOnce([a, c, b]);
+
+			const res = await app.request("/api/todos");
+			const body = await res.json();
+			expect(body.map((t: { id: string }) => t.id)).toEqual(["01CCC", "01BBB", "01AAA"]);
+
+			// 走査順が変わっても同一結果（決定性）
+			mockRepository.findAll.mockResolvedValueOnce([b, a, c]);
+			const res2 = await app.request("/api/todos");
+			const body2 = await res2.json();
+			expect(body2.map((t: { id: string }) => t.id)).toEqual(["01CCC", "01BBB", "01AAA"]);
+		});
 	});
 
 	describe("GET /api/todos/:id", () => {
@@ -136,13 +168,25 @@ describe("todoHandler", () => {
 
 			expect(res.status).toBe(400);
 		});
+
+		// BR-008（RF-04）: JSON 解釈不能は 500 ではなく 400
+		it("should return 400 when body is not valid JSON", async () => {
+			const res = await app.request("/api/todos", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: "{not json",
+			});
+
+			expect(res.status).toBe(400);
+			const body = await res.json();
+			expect(body.error).toBeDefined();
+			expect(mockRepository.create).not.toHaveBeenCalled();
+		});
 	});
 
 	describe("PUT /api/todos/:id", () => {
 		it("should update a todo", async () => {
-			const existing = { id: "1", title: "Old", completed: false };
 			const updated = { id: "1", title: "Updated", completed: false };
-			mockRepository.findById.mockResolvedValueOnce(existing);
 			mockRepository.update.mockResolvedValueOnce(updated);
 
 			const res = await app.request("/api/todos/1", {
@@ -153,10 +197,14 @@ describe("todoHandler", () => {
 
 			expect(res.status).toBe(200);
 			expect(await res.json()).toEqual(updated);
+			// BR-007（QT-9）: 事前の存在確認読取なし — 条件付き書込 1 回のみ
+			expect(mockRepository.update).toHaveBeenCalledOnce();
+			expect(mockRepository.findById).not.toHaveBeenCalled();
 		});
 
+		// BR-007（RF-07）: 条件付き書込の条件失敗 = 404。新規作成（upsert）にならない
 		it("should return 404 when updating non-existent todo", async () => {
-			mockRepository.findById.mockResolvedValueOnce(null);
+			mockRepository.update.mockResolvedValueOnce(null);
 
 			const res = await app.request("/api/todos/nonexistent", {
 				method: "PUT",
@@ -165,12 +213,37 @@ describe("todoHandler", () => {
 			});
 
 			expect(res.status).toBe(404);
+			expect(await res.json()).toEqual({ error: "Todo not found" });
+		});
+
+		// BR-009: 不正ボディ × 存在しない id の複合ケースは 400 が 404 に優先（BP-1 許容変更 4）
+		it("should return 400 (not 404) when body is invalid and id does not exist", async () => {
+			const res = await app.request("/api/todos/nonexistent", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ completed: "not-a-boolean" }),
+			});
+
+			expect(res.status).toBe(400);
+			expect(mockRepository.update).not.toHaveBeenCalled();
+		});
+
+		// BR-006: 空オブジェクトは有効入力（updatedAt のみ更新）
+		it("should accept empty object body as valid partial update", async () => {
+			const updated = { id: "1", title: "Old", completed: false };
+			mockRepository.update.mockResolvedValueOnce(updated);
+
+			const res = await app.request("/api/todos/1", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({}),
+			});
+
+			expect(res.status).toBe(200);
+			expect(mockRepository.update).toHaveBeenCalledWith("1", {});
 		});
 
 		it("should return 400 for invalid update data", async () => {
-			const existing = { id: "1", title: "Old", completed: false };
-			mockRepository.findById.mockResolvedValueOnce(existing);
-
 			const res = await app.request("/api/todos/1", {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
@@ -178,24 +251,42 @@ describe("todoHandler", () => {
 			});
 
 			expect(res.status).toBe(400);
+			expect(mockRepository.update).not.toHaveBeenCalled();
+		});
+
+		// BR-008（RF-04）: JSON 解釈不能は 500 ではなく 400。書込にも進まない
+		it("should return 400 when update body is not valid JSON", async () => {
+			const res = await app.request("/api/todos/1", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: "{not json",
+			});
+
+			expect(res.status).toBe(400);
+			const body = await res.json();
+			expect(body.error).toBeDefined();
+			expect(mockRepository.update).not.toHaveBeenCalled();
 		});
 	});
 
 	describe("DELETE /api/todos/:id", () => {
 		it("should delete a todo", async () => {
-			const existing = { id: "1", title: "Test", completed: false };
-			mockRepository.findById.mockResolvedValueOnce(existing);
-			mockRepository.delete.mockResolvedValueOnce(undefined);
+			mockRepository.delete.mockResolvedValueOnce(true);
 
 			const res = await app.request("/api/todos/1", { method: "DELETE" });
 			expect(res.status).toBe(204);
+			// BR-007（QT-9）: 事前の存在確認読取なし — 条件付き削除 1 回のみ
+			expect(mockRepository.delete).toHaveBeenCalledOnce();
+			expect(mockRepository.findById).not.toHaveBeenCalled();
 		});
 
+		// BR-007（RF-07）: 条件付き削除の条件失敗 = 404
 		it("should return 404 when deleting non-existent todo", async () => {
-			mockRepository.findById.mockResolvedValueOnce(null);
+			mockRepository.delete.mockResolvedValueOnce(false);
 
 			const res = await app.request("/api/todos/nonexistent", { method: "DELETE" });
 			expect(res.status).toBe(404);
+			expect(await res.json()).toEqual({ error: "Todo not found" });
 		});
 	});
 });

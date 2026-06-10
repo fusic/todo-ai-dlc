@@ -13,6 +13,13 @@ interface TodoItemProps {
 	onDelete: (id: string) => Promise<void>;
 }
 
+// RF-08（WF-002）: createdAt の人間可読表示。タイムゾーンに依存しない決定的なテストのため
+// Intl.DateTimeFormat を単一の整形点として公開する
+export const createdAtFormatter = new Intl.DateTimeFormat("ja-JP", {
+	dateStyle: "medium",
+	timeStyle: "short",
+});
+
 export function TodoItem({ todo, onToggle, onUpdate, onDelete }: TodoItemProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [editTitle, setEditTitle] = useState(todo.title);
@@ -20,11 +27,16 @@ export function TodoItem({ todo, onToggle, onUpdate, onDelete }: TodoItemProps) 
 
 	async function handleSave() {
 		if (!editTitle.trim()) return;
-		await onUpdate(todo.id, {
-			title: editTitle.trim(),
-			description: editDescription.trim() || undefined,
-		});
-		setIsEditing(false);
+		try {
+			await onUpdate(todo.id, {
+				title: editTitle.trim(),
+				description: editDescription.trim() || undefined,
+			});
+			setIsEditing(false);
+		} catch {
+			// BR-011（RF-05）: 失敗は親（App）がユーザー可視のエラーとして表示する。
+			// 編集モードを維持して再保存できるようにする
+		}
 	}
 
 	function handleCancel() {
@@ -94,6 +106,9 @@ export function TodoItem({ todo, onToggle, onUpdate, onDelete }: TodoItemProps) 
 					{todo.title}
 				</p>
 				{todo.description && <p className="mt-1 text-sm text-gray-500">{todo.description}</p>}
+				<p data-testid={`todo-item-${todo.id}-created-at`} className="mt-1 text-xs text-gray-400">
+					作成: {createdAtFormatter.format(new Date(todo.createdAt))}
+				</p>
 			</div>
 			<div className="flex gap-2">
 				<button

@@ -346,6 +346,10 @@
         {
           "name": "todo-smoke.spec.ts",
           "locationRelativeToIntentRoot": "../../../e2e/"
+        },
+        {
+          "name": "index.test.ts",
+          "locationRelativeToIntentRoot": "../../../packages/backend/src/"
         }
       ],
       "contributors": [

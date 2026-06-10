@@ -26,6 +26,9 @@ export function TodoForm({ onSubmit }: TodoFormProps) {
 			});
 			setTitle("");
 			setDescription("");
+		} catch {
+			// BR-011（RF-05）: 失敗は親（App）がユーザー可視のエラーとして表示する。
+			// ここでは未処理 rejection を防ぎ、再送できるよう入力値を保持する
 		} finally {
 			setIsSubmitting(false);
 		}
