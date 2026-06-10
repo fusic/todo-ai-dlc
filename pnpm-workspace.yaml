@@ -1,5 +1,9 @@
 packages:
   - "packages/*"
 
-# pnpm audit の個別 ignore はゼロ（nfr-design C-6 運用 — 発生時は理由コメント付きでここに登録し、
-# 依存更新で解消され次第削除する。GHSA-5xrq-8626-4rwp は RF-18 の Vitest 3（>=3.2.6）更新で解消済み・削除）
+# pnpm audit の個別 ignore はゼロ（nfr-design C-6 運用）。発生時は package.json の
+# pnpm.auditConfig.ignoreGhsas に登録する（packageManager 固定の pnpm 9 系では auditConfig の
+# 置き場は package.json の pnpm フィールド。advisory は GHSA ID で識別されるため C-6 の
+# ignoreCves はこのキーで実現する）。JSON はコメント不可のため ignore 理由はこのコメントに
+# 記録し、依存更新で解消され次第エントリごと削除する。
+# GHSA-5xrq-8626-4rwp は RF-18 の Vitest 3（>=3.2.6）更新で解消済み・削除。

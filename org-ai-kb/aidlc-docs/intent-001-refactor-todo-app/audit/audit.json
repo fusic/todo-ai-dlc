@@ -102,6 +102,12 @@
       "stage": "code-generation",
       "presented": "unit todo-app の owner plan.md（20 ステップ、P0: shared+CI+E2E / P1: RF-04〜13 / P2: IaC CH-1〜10+IT-1〜10 ほか、write-test-verify リズム）と clarification questions Q1-Q4（E2E 配置、依存更新範囲、フェーズ進行、v1 文書更新範囲）。実測ベースライン（38/45 pass・lint/build red）の補足込み",
       "decision": "plan 承認。Q1: a（ルート直下 e2e/）、Q2: a（4 系統のみ + peer 随伴）、Q3: a（各フェーズ境界で停止・確認）、Q4: b（3 点修正 + 正の所在バナー）"
+    },
+    {
+      "timestamp": "2026-06-10T12:43:11Z",
+      "stage": "code-generation",
+      "presented": "unit todo-app の成果物サマリー（P0 c8c95c8 / P1 185e7b4 / P2 ec7a92e の 3 フェーズコミット、テスト 99 件・E2E 2/2・synth 平文 0、implementation-map.md 全 ID トレース、contributor 重大 0 件、code-reviewer 独立再検証で BP-1 を baseline diff 全数照合）と reviewer 判定 READY（非ブロッキング gap 3 件: v1 バナー 4/5、originVerify 非定数時間比較、E2E はレビュー環境制約で owner 証跡+CI 代替）、process-checker PASS",
+      "decision": "承認。CONSTRUCTION フェーズ完了（4 ステージすべて complete）。残作業の申し送り: push 後の CI 実体 green 確認、ブランチ保護の手動有効化、実デプロイ + SNS 購読"
     }
   ]
 }

@@ -75,8 +75,10 @@ jobs:
         with:
           node-version: 20
       # high 以上の CVE で fail（QT-8 / D-3）。修正不能な上流 advisory は
-      # auditConfig.ignoreGhsas（package.json / pnpm-workspace.yaml — 理由コメント付き）で
-      # 個別 ignore し、Renovate の更新で解消され次第削除する（C-6 運用）
+      # package.json の pnpm.auditConfig.ignoreGhsas で個別 ignore する（C-6 運用 —
+      # packageManager 固定の pnpm 9 系では auditConfig の置き場は package.json の pnpm フィールド。
+      # advisory は GHSA ID で識別されるため C-6 の ignoreCves はこのキーで実現する）。
+      # 理由は pnpm-workspace.yaml のコメントに記録し、Renovate の更新で解消され次第削除する
       - run: pnpm audit --audit-level=high
 
   e2e:

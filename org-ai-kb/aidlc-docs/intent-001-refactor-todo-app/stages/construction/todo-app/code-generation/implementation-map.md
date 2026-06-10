@@ -44,7 +44,7 @@
 | UNIT-001 | `.github/workflows/ci.yml` | CI 6 ジョブ（QT-7。synth ジョブは frontend build 先行 — DEP-O2） | RF-01/02 / D-3 / D-7 |
 | UNIT-001 | `package.json`（root） | `deploy` script（frontend build → cdk deploy の順序内包 — RF-20）、typecheck / test:e2e / lint scripts、Biome 2.4.16 | RF-20 / RF-18 / DEP-O2 |
 | UNIT-001 | `renovate.json` | 依存自動更新（minor/patch グループ化、zod major 凍結 = OOS-6、CDK pin 維持 = C-2） | RF-19 / QT-8 |
-| UNIT-001 | `pnpm-workspace.yaml` | workspace 定義。audit ignore は 0 件（GHSA-5xrq-8626-4rwp は Vitest 3 更新で解消・削除 — C-6 運用） | RF-18 / D-3 / C-6 |
+| UNIT-001 | `pnpm-workspace.yaml` | workspace 定義。audit ignore は 0 件（GHSA-5xrq-8626-4rwp は Vitest 3 更新で解消・削除 — C-6 運用）。ignore 発生時の置き場は package.json の `pnpm.auditConfig.ignoreGhsas`（pnpm 9 系）、理由は本ファイルのコメントに記録 | RF-18 / D-3 / C-6 |
 | UNIT-001 | `docker-compose.yml` | ローカル環境（A-7）。backend へ `ORIGIN_VERIFY_SECRET=local-dev-only` 注入（C-5） | D-1 / C-5 / RF-16 |
 | UNIT-001 | `Dockerfile.dev` | lockfile 固定強制（フォールバック撤去）+ 非 root（node）実行 | RF-21 / SECURITY-10 |
 | UNIT-001 | `packages/frontend/vite.config.ts` | Vite proxy が dev 値ヘッダ `x-origin-verify` を注入（ローカル経路 — D-1） | RF-16 / C-5 |
@@ -70,3 +70,14 @@
 | QT-1 / QT-2（実測） | レイテンシ実測値は AWS 実環境デプロイ後にのみ観測可能（本ステージはデプロイしない） | アラーム 4 種が計測装置として synth テンプレートに存在（IT-6 で assert）。実測は運用フェーズ |
 | BR-013（本番経路の実機検証） | CloudFront → API GW の実ヘッダ付与はデプロイ後にのみ検証可能 | IT-4/IT-5（テンプレート上の注入）+ ローカル同一コードパスの E2E（BT-1〜5 + BT-7）で代替。デプロイ後は ApiUrl 直接アクセス 403 で確認可能（CH-9 の説明文） |
 | RF-18（dev 環境 Node） | ローカル開発コンテナは `node:20-slim`（v20.20.2）— Vite 7 要件 ≥20.19 を満たすが Node 20 系は保守終了が近い | C-7 の確認結果として記録（メジャー変更は BP-1 範囲外 — 将来の Renovate / intent で対応） |
+| QT-8（moderate 残存） | `pnpm audit` に moderate 18 件 + low 1 件が現存（high/critical 0 件 — `--audit-level=high` ゲートは green。D-3 のトレードオフどおりの設計的挙動） | RF-19 の renovate.json は実装済み — 残るのは GitHub 側の Renovate App 有効化のみ。push 後に速やかに有効化し、グループ PR で moderate を消化することを orchestrator / 人間へ運用申し送り。high へ昇格した場合は CI audit ジョブが fail して検知される |
+
+## Contribution 対応（Refine — aidlc-systems-architect-agent contribution §3 への返答）
+
+> contribution（2026-06-10）の総合判定は「適合（修正要求なし）」。軽微 3 件への owner 処置を以下に記録する。
+
+| # | 指摘 | 処置 | 理由 |
+|---|---|---|---|
+| 1 | C-6 の運用記述ドリフト（nfr-design C-6 = `ignoreCves`（package.json）vs 実装コメント = `ignoreGhsas`（package.json / pnpm-workspace.yaml）） | **対応（実装コメント側を修正）**: `ci.yml` audit ジョブと `pnpm-workspace.yaml` のコメントを「置き場 = package.json の `pnpm.auditConfig.ignoreGhsas`（pnpm 9 系）、理由記録 = pnpm-workspace.yaml のコメント（JSON はコメント不可）」へ統一 | nfr-specification.md は nfr-design（complete・他 persona 所有）の成果物のため本ステージでは触れない。contribution の分析どおり advisory は GHSA ID で識別されるため `ignoreGhsas` を維持し、pnpm-workspace.yaml を置き場とする v10 前提の表記のみ除去した。C-6 の意図（理由付き個別 ignore + 解消次第削除）は不変 |
+| 2 | moderate 18 件 + low 1 件の現存（QT-8 ゲートは green） | **対応（運用申し送りを明文化）**: Coverage Gaps に「QT-8（moderate 残存）」行を追加 — push 後の Renovate 有効化とグループ PR での消化を申し送り | D-3 の設計的挙動でありコード変更は不要。仕組み（renovate.json）は実装済みで、残作業は GitHub 側の有効化のみのため申し送り事項として記録するのが適切 |
+| 3 | state.json outputs の `../../../` 表記（state-schema.json の例示は `/` 始まり） | **見送り（現表記を維持・根拠を記録）** | schema の規定は「intent root からの相対ディレクトリパス・`/` 終端」であり、`../../../packages/...` はこれを満たす。実装コードは workspace root に置く（persona 規律「generated code は aidlc-docs に置かない」+ folder-structure.md「intent artifacts live alongside the project」）ため intent root 内の `/` 始まりでは実在位置を表現できない。`/` 始まりへ書き換えると所在が虚偽になるため現表記が最も正確。規約側の例示拡充は final reviewer / orchestrator の判断に委ねる（contribution §3-3 と同見解） |

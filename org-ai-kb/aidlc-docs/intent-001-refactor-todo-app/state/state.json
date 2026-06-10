@@ -1,7 +1,7 @@
 {
   "intent": "refactor-todo-app",
   "created": "2026-06-09T22:42:42Z",
-  "updated": "2026-06-10T11:05:00Z",
+  "updated": "2026-06-10T12:43:11Z",
   "stages": [
     {
       "stage": "reverse-engineering",
@@ -290,7 +290,7 @@
     {
       "stage": "code-generation",
       "unit": "todo-app",
-      "status": "artifact-generated",
+      "status": "complete",
       "owner": "aidlc-sw-dev-engineer-agent",
       "reviewer": "aidlc-code-reviewer-agent",
       "reviewIterations": 0,
@@ -372,7 +372,15 @@
           "locationRelativeToIntentRoot": "../../../"
         },
         {
+          "name": "pnpm-workspace.yaml",
+          "locationRelativeToIntentRoot": "../../../"
+        },
+        {
           "name": "implementation-map.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "aidlc-systems-architect-agent-contribution.md",
           "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
         },
         {
@@ -382,10 +390,20 @@
         {
           "name": "unit.md",
           "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "aidlc-code-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
         }
       ],
       "contributors": [
         "aidlc-systems-architect-agent"
+      ],
+      "contributions": [
+        {
+          "persona": "aidlc-systems-architect-agent",
+          "contributed": true
+        }
       ]
     }
   ]
