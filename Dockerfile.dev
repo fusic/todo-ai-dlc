@@ -1,18 +1,24 @@
+# ローカル開発専用イメージ（A-7 — docker compose から利用。本番は Lambda / S3 のためイメージなし）
+# RF-21: lockfile 固定の強制（フォールバックなし — 不整合はビルド失敗 = SECURITY-10 の意図）+ 非 root 実行
 FROM node:20-slim
 
+# corepack は root で有効化し、pnpm のバージョンを packageManager と一致させる
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 
+# RF-21: 非 root ユーザーで実行（node:20-slim 同梱の node ユーザー）
+RUN chown node:node /app
+USER node
+
 # Copy workspace config and all package.json files for dependency caching
-COPY package.json pnpm-workspace.yaml ./
-COPY packages/backend/package.json packages/backend/
-COPY packages/frontend/package.json packages/frontend/
-COPY packages/infrastructure/package.json packages/infrastructure/
+COPY --chown=node:node package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY --chown=node:node packages/shared/package.json packages/shared/
+COPY --chown=node:node packages/backend/package.json packages/backend/
+COPY --chown=node:node packages/frontend/package.json packages/frontend/
+COPY --chown=node:node packages/infrastructure/package.json packages/infrastructure/
 
-# Copy lockfile if exists
-COPY pnpm-lock.yaml* ./
-
-RUN pnpm install --frozen-lockfile || pnpm install
+# RF-21: `|| pnpm install` フォールバックを撤去 — lockfile と manifest の不整合はここで fail する
+RUN pnpm install --frozen-lockfile
 
 # Source code is mounted via docker compose volumes

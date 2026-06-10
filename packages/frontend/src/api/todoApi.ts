@@ -1,4 +1,4 @@
-import type { CreateTodoInput, Todo, UpdateTodoInput } from "../types/todo";
+import type { CreateTodoInput, Todo, UpdateTodoInput } from "@todo-ai-dlc/shared";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -19,10 +19,8 @@ export const todoApi = {
 		return handleResponse<Todo[]>(res);
 	},
 
-	async fetchTodo(id: string): Promise<Todo> {
-		const res = await fetch(`${API_BASE}/todos/${id}`);
-		return handleResponse<Todo>(res);
-	},
+	// fetchTodo（GET /api/todos/:id）のクライアントは UI 未使用のため削除（RF-09）。
+	// エンドポイント API-003 自体は公開コントラクトとして backend 側に維持される。
 
 	async createTodo(input: CreateTodoInput): Promise<Todo> {
 		const res = await fetch(`${API_BASE}/todos`, {

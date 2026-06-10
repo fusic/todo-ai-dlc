@@ -1,0 +1,21 @@
+{
+	"name": "@todo-ai-dlc/shared",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./schemas": "./src/schemas.ts"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"zod": "^3.24.0"
+	},
+	"devDependencies": {
+		"typescript": "^5.7.0",
+		"vitest": "^3.2.6"
+	}
+}

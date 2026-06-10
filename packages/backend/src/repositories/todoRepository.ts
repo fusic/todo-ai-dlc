@@ -1,13 +1,13 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
-	DynamoDBDocumentClient,
 	DeleteCommand,
+	DynamoDBDocumentClient,
 	GetCommand,
 	PutCommand,
 	ScanCommand,
 	UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import type { Todo, UpdateTodoInput } from "../types/todo";
+import type { Todo, UpdateTodoInput } from "@todo-ai-dlc/shared";
 
 const client = new DynamoDBClient({
 	region: process.env.AWS_REGION ?? "ap-northeast-1",
@@ -17,6 +17,12 @@ const client = new DynamoDBClient({
 });
 const docClient = DynamoDBDocumentClient.from(client);
 const tableName = process.env.TABLE_NAME ?? "TodoTable";
+
+// BR-007（RF-07 / QT-9）: 存在判定と書込は ConditionExpression による単一のアトミック操作。
+// 条件失敗（= 対象なし）は正常系の一部として null / false に写像し、その他の例外は 500 系（BR-012）へ伝播させる。
+function isConditionalCheckFailed(error: unknown): boolean {
+	return error instanceof Error && error.name === "ConditionalCheckFailedException";
+}
 
 export const todoRepository = {
 	async findAll(): Promise<Todo[]> {
@@ -44,7 +50,10 @@ export const todoRepository = {
 		return todo;
 	},
 
-	async update(id: string, input: UpdateTodoInput): Promise<Todo> {
+	/**
+	 * 部分更新（BR-006）。存在しない id は null を返す（BR-007 — DynamoDB 呼出 1 回のアトミック判定）。
+	 */
+	async update(id: string, input: UpdateTodoInput): Promise<Todo | null> {
 		const now = new Date().toISOString();
 		const expressionParts: string[] = [];
 		const expressionNames: Record<string, string> = {};
@@ -70,26 +79,45 @@ export const todoRepository = {
 		expressionNames["#updatedAt"] = "updatedAt";
 		expressionValues[":updatedAt"] = now;
 
-		const result = await docClient.send(
-			new UpdateCommand({
-				TableName: tableName,
-				Key: { id },
-				UpdateExpression: `SET ${expressionParts.join(", ")}`,
-				ExpressionAttributeNames: expressionNames,
-				ExpressionAttributeValues: expressionValues,
-				ReturnValues: "ALL_NEW",
-			}),
-		);
-
-		return result.Attributes as Todo;
+		try {
+			const result = await docClient.send(
+				new UpdateCommand({
+					TableName: tableName,
+					Key: { id },
+					ConditionExpression: "attribute_exists(id)",
+					UpdateExpression: `SET ${expressionParts.join(", ")}`,
+					ExpressionAttributeNames: expressionNames,
+					ExpressionAttributeValues: expressionValues,
+					ReturnValues: "ALL_NEW",
+				}),
+			);
+			return result.Attributes as Todo;
+		} catch (error) {
+			if (isConditionalCheckFailed(error)) {
+				return null;
+			}
+			throw error;
+		}
 	},
 
-	async delete(id: string): Promise<void> {
-		await docClient.send(
-			new DeleteCommand({
-				TableName: tableName,
-				Key: { id },
-			}),
-		);
+	/**
+	 * 物理削除。存在しない id は false を返す（BR-007 — DynamoDB 呼出 1 回のアトミック判定）。
+	 */
+	async delete(id: string): Promise<boolean> {
+		try {
+			await docClient.send(
+				new DeleteCommand({
+					TableName: tableName,
+					Key: { id },
+					ConditionExpression: "attribute_exists(id)",
+				}),
+			);
+			return true;
+		} catch (error) {
+			if (isConditionalCheckFailed(error)) {
+				return false;
+			}
+			throw error;
+		}
 	},
 };

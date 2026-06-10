@@ -1,8 +1,18 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"organizeImports": {
-		"enabled": true
+	"$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+	"files": {
+		"includes": [
+			"**",
+			"!**/dist",
+			"!**/cdk.out",
+			"!**/coverage",
+			"!**/test-results",
+			"!**/playwright-report",
+			"!**/org-ai-kb",
+			"!**/aidlc-docs"
+		]
 	},
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {

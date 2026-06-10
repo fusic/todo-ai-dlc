@@ -45,3 +45,7 @@ __pycache__/
 .aidlc-workflows/
 aidlc-docs/aidlc-state.md
 aidlc-docs/audit.md
+
+# Playwright (RF-02)
+test-results/
+playwright-report/

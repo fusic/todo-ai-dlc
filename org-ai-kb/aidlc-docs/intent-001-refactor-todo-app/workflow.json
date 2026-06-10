@@ -1,0 +1,89 @@
+{
+  "intent": "refactor-todo-app",
+  "composed": "2026-06-09T22:42:42Z",
+  "maxReviewIterations": 3,
+  "stages": [
+    {
+      "stage": "reverse-engineering",
+      "phase": "inception",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "autonomy": "supervised",
+      "rationale": "Brownfield で org-ai-kb に既存コンテキストがないため、現状のコードベースを設計成果物として記述することから始める"
+    },
+    {
+      "stage": "requirements-analysis",
+      "phase": "inception",
+      "owner": "aidlc-product-manager-agent",
+      "contributors": ["aidlc-systems-architect-agent"],
+      "reviewer": "aidlc-product-lead-agent",
+      "autonomy": "supervised",
+      "rationale": "v1 の aidlc-docs/inception/requirements/requirements.md を検証・補強（validate-and-augment）し、リファクタリング目的（コード品質・アーキテクチャ・テスト/型安全・インフラ刷新）を要件化する"
+    },
+    {
+      "stage": "domain-design",
+      "phase": "inception",
+      "owner": "aidlc-app-architect-agent",
+      "contributors": ["aidlc-product-manager-agent"],
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "autonomy": "supervised",
+      "rationale": "リファクタリング後の論理コンポーネント構造（レイヤー分離・型共有）を定義する"
+    },
+    {
+      "stage": "units-generation",
+      "phase": "inception",
+      "owner": "aidlc-app-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "autonomy": "supervised",
+      "rationale": "コンポーネントをデプロイ可能ユニットにグループ化し、construction の fan-out 単位を決める"
+    },
+    {
+      "stage": "functional-design",
+      "phase": "construction",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "autonomy": "supervised",
+      "rationale": "ユニット毎の詳細設計。units-generation 完了後にユニット毎へ fan-out する"
+    },
+    {
+      "stage": "nfr-design",
+      "phase": "construction",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "autonomy": "supervised",
+      "rationale": "目的に『インフラ含む全面刷新』が含まれるため追加。品質目標・技術スタック・アーキテクチャパターンを定義する"
+    },
+    {
+      "stage": "infrastructure-design",
+      "phase": "construction",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "autonomy": "supervised",
+      "rationale": "目的に『インフラ含む全面刷新』が含まれるため追加。CDK スタックの刷新設計を行う"
+    },
+    {
+      "stage": "code-generation",
+      "phase": "construction",
+      "owner": "aidlc-sw-dev-engineer-agent",
+      "contributors": ["aidlc-systems-architect-agent"],
+      "reviewer": "aidlc-code-reviewer-agent",
+      "autonomy": "supervised",
+      "rationale": "write-test-verify サイクルでリファクタリングを実装する"
+    },
+    {
+      "stage": "story-generation",
+      "skipped": true,
+      "skip-reason": "リファクタリング intent のため新規ユーザー向け機能はなく、ストーリー分解は不要"
+    },
+    {
+      "stage": "wireframe-design",
+      "skipped": true,
+      "skip-reason": "UI の見た目・画面構成は変更しないため不要"
+    },
+    {
+      "stage": "contract-design",
+      "skipped": true,
+      "skip-reason": "小規模単一システムで、frontend-backend 間 API 契約は functional-design の api-specification で扱える"
+    }
+  ]
+}

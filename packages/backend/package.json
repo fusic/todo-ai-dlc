@@ -9,17 +9,19 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@aws-sdk/client-dynamodb": "^3.700.0",
-		"@aws-sdk/lib-dynamodb": "^3.700.0",
+		"@aws-lambda-powertools/logger": "^2.33.1",
+		"@aws-sdk/client-dynamodb": "^3.1065.0",
+		"@aws-sdk/lib-dynamodb": "^3.1065.0",
+		"@todo-ai-dlc/shared": "workspace:*",
 		"hono": "^4.6.0",
-		"ulid": "^2.3.0",
-		"zod": "^3.24.0"
+		"ulid": "^2.3.0"
 	},
 	"devDependencies": {
 		"@hono/node-server": "^1.13.0",
 		"@types/aws-lambda": "^8.10.0",
+		"@types/node": "^20.17.0",
 		"tsx": "^4.19.0",
 		"typescript": "^5.7.0",
-		"vitest": "^2.1.0"
+		"vitest": "^3.2.6"
 	}
 }

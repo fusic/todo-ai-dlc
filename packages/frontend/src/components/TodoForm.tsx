@@ -1,5 +1,9 @@
-import { useState, type FormEvent } from "react";
-import type { CreateTodoInput } from "../types/todo";
+import {
+	type CreateTodoInput,
+	DESCRIPTION_MAX_LENGTH,
+	TITLE_MAX_LENGTH,
+} from "@todo-ai-dlc/shared";
+import { type FormEvent, useState } from "react";
 
 interface TodoFormProps {
 	onSubmit: (input: CreateTodoInput) => Promise<void>;
@@ -22,6 +26,9 @@ export function TodoForm({ onSubmit }: TodoFormProps) {
 			});
 			setTitle("");
 			setDescription("");
+		} catch {
+			// BR-011（RF-05）: 失敗は親（App）がユーザー可視のエラーとして表示する。
+			// ここでは未処理 rejection を防ぎ、再送できるよう入力値を保持する
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -36,7 +43,7 @@ export function TodoForm({ onSubmit }: TodoFormProps) {
 					onChange={(e) => setTitle(e.target.value)}
 					placeholder="TODO タイトル"
 					data-testid="todo-form-title-input"
-					maxLength={200}
+					maxLength={TITLE_MAX_LENGTH}
 					className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 				/>
 			</div>
@@ -46,7 +53,7 @@ export function TodoForm({ onSubmit }: TodoFormProps) {
 					onChange={(e) => setDescription(e.target.value)}
 					placeholder="説明（任意）"
 					data-testid="todo-form-description-input"
-					maxLength={1000}
+					maxLength={DESCRIPTION_MAX_LENGTH}
 					rows={2}
 					className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 				/>

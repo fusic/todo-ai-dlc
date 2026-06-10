@@ -1,0 +1,291 @@
+# components.yaml — domain-design / intent: refactor-todo-app
+# Owner: aidlc-app-architect-agent
+#
+# 構成決定（questions.md 回答済み・plan.md 承認済み）:
+#   Q1=a: 現状境界の保持 + RF-03 反映（frontend / backend / shared の 3 論理コンポーネント）
+#   Q2=a: shared をコンポーネント登録（コントラクト定義の単一ソース）。Todo エンティティの所有は backend
+#   Q3=a: IaC / CI / E2E / 開発環境 / 文書 は非コンポーネント要素として components.md の専用節に記録
+#
+# 規約ノート:
+#   - Source.Business-Transactions は stories.md 不在のための代替参照（plan.md 記載の fallback。
+#     business-overview.md の BT-1〜BT-7 を参照する）
+#   - DynamoDB / CloudWatch Logs はコンポーネントではなく CMP-002 の外部依存
+#     （Behaviour-summary / Boundaries に記録）
+#   - デプロイトポロジーは本ステージでは決定しない（units-generation の管轄）
+#
+# units-generation での追記（copy-forward — 2026-06-10）:
+#   - 各 Component に所有 unit 参照（Unit: UNIT-001 = todo-app、Q1=a 単一ユニット）のみを追加した
+#   - CMP Id / Name / Behaviour-summary / Responsibilities / Boundaries / Source /
+#     Dependency / Dependent-Component / Entities（ENT-001 の属性 6 件含む）は domain-design 版から不変
+#
+# functional-design での追記（copy-forward — 2026-06-10 / owner: aidlc-systems-architect-agent）:
+#   - 各 Component に Functional-Design-References ブロックのみを追加した（entity / rule / workflow /
+#     state-machine / API 参照。正は entities.yaml / rules.yaml / api-specification.md / functional-spec.md）
+#   - CMP Id / Name / Unit / Behaviour-summary / Responsibilities / Boundaries / Source /
+#     Dependency / Dependent-Component / Entities は units-generation 版から不変（blueprint identity 維持）
+#   - 本ステージの設計決定（questions.md Q1〜Q5 = 全問 a）の各コンポーネントへの影響は
+#     Functional-Design-References.Decisions に記録した
+#
+# nfr-design での追記（copy-forward — 2026-06-10 / owner: aidlc-systems-architect-agent）:
+#   - 各 Component に NFR-Annotations ブロックのみを追加した（quality targets / data classification /
+#     resiliency / observability / scalability / security。正は本ステージ nfr-specification.md —
+#     QT-1〜QT-9・D-1〜D-7・C-1〜C-9 を参照する）
+#   - CMP Id / Name / Unit / Behaviour-summary / Responsibilities / Boundaries / Source /
+#     Dependency / Dependent-Component / Entities / Functional-Design-References は
+#     functional-design 版から不変（blueprint identity 維持）
+#   - 実行基盤（Lambda / API GW / DynamoDB / CloudFront / アラーム / Secret）はコンポーネントではなく
+#     非コンポーネント要素 — 具体のリソース構成は infrastructure-design の管轄
+
+Component:
+  Id: CMP-001
+  Name: "Todo Frontend"
+  Unit: UNIT-001   # todo-app（units-generation で追記 — units.md 参照）
+  Behaviour-summary: >-
+    エンドユーザーが TODO を操作するための対話面（SPA）。TODO の一覧表示・新規作成・
+    インライン編集・完了切替・削除の操作と、ロード中/エラー/空状態の提示を担う。
+    業務ルールの強制点ではなく、コントラクト（CMP-003）に従って CMP-002 を呼び出す利用者。
+  Responsibilities:
+    - "TODO 一覧の表示: createdAt 降順の安定表示（RF-06 の表示面）と 0 件時の空状態メッセージ"
+    - "各アイテムの title / completed / createdAt の表示（RF-08 で createdAt 表示を追加し FR-002 ドリフトを解消）"
+    - "新規作成フォームの提供（BT-1 の入力面。文字数の入力補助は CMP-003 の共有定数 200/1000 を参照する UX 目的であり、防衛線ではない）"
+    - "インライン編集・完了トグル・削除の操作面（BT-3 / BT-4 / BT-5）"
+    - "ミューテーション失敗時のユーザーへのエラー表示と未処理 rejection の解消（RF-05）"
+    - "API クライアントの保守: 未使用クライアント fetchTodo の削除（RF-09。GET /api/todos/:id エンドポイント自体は CMP-002 が維持）"
+  Boundaries:
+    - "業務ルールの強制（検証・ID 生成・completed 初期化・タイムスタンプ・永続化）は所有しない — CMP-002 の責務"
+    - "コントラクト定義（型・schema・制約定数）は所有しない — CMP-003 を参照する（RF-03 で重複定義を解消）"
+    - "Todo エンティティ（ENT-001）を所有しない — 表示・操作のみ"
+    - "内部の実装構造（container/presentational 分割、API クライアントモジュール）はコンポーネント境界ではない"
+  Source:
+    Requirements:
+      - FR-001
+      - FR-002
+      - FR-003
+      - FR-004
+      - RF-05
+      - RF-06   # 実現箇所（API かフロントか）は設計ステージで決定 — CMP-002 と択一の候補
+      - RF-08
+      - RF-09
+      - RF-13   # build/typecheck 分離 — 本パッケージのビルド定義に着地（業務振る舞い変更なし）
+      - NFR-004
+      - BP-1
+    Business-Transactions:
+      - BT-1
+      - BT-2
+      - BT-3
+      - BT-4
+      - BT-5
+  Dependency:
+    - Component:
+        Id: CMP-002
+        Name: "Todo Backend API"
+        Interaction: "実行時に HTTP（/api、JSON）で BT-1〜BT-5 の CRUD を呼び出す。コンパイル時依存はない"
+    - Component:
+        Id: CMP-003
+        Name: "Shared Contract"
+        Interaction: "ビルド時に Todo / 入力型と制約定数（200/1000）を workspace: 依存で import する（RF-03）"
+  Dependent-Component: []
+  Entities: {}
+  Functional-Design-References:   # functional-design で追記（copy-forward 拡張 — 2026-06-10）
+    Entities: []   # ENT-001 を所有しない（表示・操作のみ — Boundaries どおり）
+    Rules:
+      - "BR-011 — ミューテーション失敗のユーザー可視エラー（RF-05。本コンポーネントが従う唯一の振る舞い規則）"
+      - "BR-014 — CMP-003 からは型と制約定数のみ import（消費側として遵守 — Q4=a）"
+    Workflows:
+      - "WF-001〜WF-005（functional-spec.md — BT-1〜BT-5 の操作面）"
+    State-Machines: []   # SM-001 の所有者は CMP-002
+    APIs:
+      - "consumer として: API-001 / API-002 / API-004 / API-005（api-specification.md。API-003 は RF-09 で未使用クライアント削除後は消費しない。API-006 は消費しない）"
+    Decisions:
+      - "Q1=a: 一覧の防衛的ソートは行わない（順序保証は API-002 のコントラクト — BR-010）"
+  NFR-Annotations:   # nfr-design で追記（copy-forward 拡張 — 2026-06-10。正は nfr-specification.md）
+    Quality-Targets:
+      - "QT-6（ユーザー面）: ミューテーション失敗のユーザー可視化（BR-011 — 観測性の UI 側）"
+      - "QT-7: CI の lint / typecheck / test / E2E 対象（RF-01/02。build と typecheck の分離は RF-13）"
+    Data-Classification: "public — 認証なしデモ・PII なし・単一共有リスト（A-2）。表示データは全利用者共通"
+    Resiliency:
+      - "ミューテーション失敗はユーザー可視エラー（BR-011）。自動リトライは導入しない（人間が再操作）"
+      - "一覧取得失敗は既存のエラー状態表示を維持"
+    Observability:
+      - "E2E（Playwright — D-7）が既存 data-testid を locator として使用（RF-02 受入基準）"
+      - "フロント側の計測（RUM 等）は対象外（OOS-9 — QT-1 rationale）"
+    Scalability: "CloudFront（CDN）による静的配信スケール — 追加設計不要（C-1）"
+    Security:
+      - "CloudFront セキュリティヘッダ / CSP connect-src 'self' を維持（AR-O10 — 既存構成）"
+      - "secrets を一切保持しない（dev ヘッダ値の注入はローカル構成側 — D-1。本コンポーネントのコードには持たない）"
+    Tech-Stack-Deltas:
+      - "Vite 7 / Vitest 3 / Biome 2 への更新対象（RF-18 — C-7 の Node エンジン要件確認を含む）"
+
+---
+
+Component:
+  Id: CMP-002
+  Name: "Todo Backend API"
+  Unit: UNIT-001   # todo-app（units-generation で追記 — units.md 参照）
+  Behaviour-summary: >-
+    TODO 管理の業務能力を REST API として提供する、ビジネスルールの唯一の強制点。
+    入力検証・ID 付与・完了状態の初期化・タイムスタンプ管理・永続化・エラーの安全な隠蔽を担い、
+    Todo エンティティ（ENT-001）のライフサイクルを所有する。永続化は DynamoDB（TodoTable）、
+    ログ出力は CloudWatch Logs に依存する（いずれも外部依存でありコンポーネントではない）。
+  Responsibilities:
+    - "BT-1〜BT-7 全件の API 提供: 作成（POST）/ 一覧（GET）/ 個別取得（GET :id — UI 未使用だが公開コントラクトとして維持）/ 更新（PUT、部分更新意味論）/ 削除（DELETE）/ ヘルスチェック（GET /api/health）"
+    - "入力検証の強制: CMP-003 の zod schema を API 境界で強制。不正 JSON ボディも 400 のクライアントエラーとして扱う（RF-04）"
+    - "Todo ライフサイクル管理: ULID 生成・completed=false 初期化・createdAt/updatedAt 付与（ENT-001 所有の根拠）"
+    - "永続化と存在判定: 条件付き書込（attribute_exists）による更新・削除のアトミック化と 404 セマンティクス維持（RF-07。複合ケース 400/404 優先順位は BP-1 許容変更 4）"
+    - "一覧の順序保証（RF-06 を API 側で実現する場合 — 実現箇所は設計ステージで決定）"
+    - "運用可観測性の出力: 構造化（JSON）リクエストログ（RF-10）、エラースタックのサーバー側ログ出力（RF-11）。クライアント応答への内部情報非開示（SECURITY-09）は維持"
+    - "通信横断処理: CORS 定義の一元化の API 側（RF-12）、CloudFront カスタムヘッダ検証による意図経路の強制の API 側（RF-16）"
+  Boundaries:
+    - "表示・UX は所有しない — CMP-001 の責務"
+    - "コントラクト定義の単一ソースは所有しない — CMP-003 の schema から z.infer で型導出する（RF-03）"
+    - "DynamoDB（TodoTable）・CloudWatch Logs はコンポーネントではなく本コンポーネントの外部依存"
+    - "実行基盤の構成（Lambda / API Gateway / CloudFront / IAM / アラーム）は所有しない — IaC（非コンポーネント要素、components.md 参照）"
+    - "routes → handlers → repositories のレイヤード構成、Lambda/ローカルの二重エントリ（index.ts / dev.ts）は内部実装構造でありコンポーネント境界ではない"
+  Source:
+    Requirements:
+      - FR-001
+      - FR-002
+      - FR-003
+      - FR-004
+      - RF-04
+      - RF-06   # 実現箇所（API かフロントか）は設計ステージで決定 — CMP-001 と択一の候補
+      - RF-07
+      - RF-10
+      - RF-11
+      - RF-12   # API 側（Hono cors()）。API Gateway corsPreflight 側は非コンポーネント要素（IaC）
+      - RF-16   # API 側（ヘッダ検証）。ヘッダ付与・Secret 管理側は非コンポーネント要素（IaC）
+      - NFR-003
+      - NFR-005
+      - BP-1
+    Business-Transactions:
+      - BT-1
+      - BT-2
+      - BT-3
+      - BT-4
+      - BT-5
+      - BT-6
+      - BT-7
+  Dependency:
+    - Component:
+        Id: CMP-003
+        Name: "Shared Contract"
+        Interaction: "ビルド時に zod schema を import し z.infer で型導出する。検証の強制点は本コンポーネント（RF-03）"
+  Dependent-Component:
+    - Component:
+        Id: CMP-001
+        Name: "Todo Frontend"
+        Interaction: "実行時に HTTP（/api、JSON）で CRUD を呼び出す"
+  Entities:
+    ENT-001:
+      Name: "Todo"
+      Description: >-
+        タスク 1 件を表す唯一のビジネスエンティティ。ライフサイクル（生成規則・検証・更新・削除・永続化）の
+        強制点は本コンポーネント（Q2=a）。形状・制約値の定義の単一ソースは CMP-003（RF-03）。
+      Attributes:
+        - "id — string。ULID（26 文字、辞書順=時系列）。サーバー生成。一意識別子・永続化キー（DynamoDB PK）"
+        - "title — string。必須、1〜200 文字（zod CreateTodoSchema / UpdateTodoSchema。最大値 200 は CMP-003 の共有定数）"
+        - "description — string。任意、最大 1000 文字（zod。最大値 1000 は CMP-003 の共有定数）"
+        - "completed — boolean。必須。作成時 false 固定（本コンポーネントが初期化）"
+        - "createdAt — string。ISO 8601。作成時にサーバーが付与"
+        - "updatedAt — string。ISO 8601。更新のたびにサーバーが更新"
+  Functional-Design-References:   # functional-design で追記（copy-forward 拡張 — 2026-06-10）
+    Entities:
+      - "ENT-001 Todo — 詳細スキーマは entities.yaml が正（属性 6 件の Id・型・所有は上記 Entities ブロックから不変）"
+    Rules:
+      - "BR-001〜BR-010, BR-012, BR-013 — 強制点として所有（rules.yaml が正）"
+    Workflows:
+      - "WF-001〜WF-007（functional-spec.md — BT-1〜BT-7 の API 面・全件）"
+    State-Machines:
+      - "SM-001 Todo ライフサイクル（functional-spec.md — 未完了 ⇄ 完了、生成 → 削除）"
+    APIs:
+      - "provider として: API-001〜API-006（api-specification.md が正。6 操作 + 共通エラー応答 400/403/404/500）"
+    Decisions:
+      - "Q1=a: RF-06 の実現箇所は本コンポーネントに確定（BR-010 — ソート済み配列の返却がコントラクトの一部）"
+      - "Q2=a: CORS は API 側も撤去（0 箇所）。同一オリジン前提は api-specification.md 通信前提に明文化。E2E（RF-02）による全 BT 検証が撤去の条件"
+      - "RF-22②: PUT 部分更新意味論の v2 正式文書は api-specification.md API-004（BR-006）"
+  NFR-Annotations:   # nfr-design で追記（copy-forward 拡張 — 2026-06-10。正は nfr-specification.md）
+    Quality-Targets:
+      - "QT-1: レイテンシ — Lambda Duration p95 ≤ 500ms（NFR-001 の正式計測点 — D-4。コールドスタートはメトリクス定義で除外）"
+      - "QT-4: 意図経路の強制 — 経路証明なしは全操作 403（BR-013。検証ミドルウェア常時有効 — D-1）"
+      - "QT-5: IAM 最小権限 — DynamoDB 5 アクション限定（RF-14）"
+      - "QT-6: 構造化ログ + エラー stack のサーバー側出力（RF-10/11。500 非開示は BR-012 で確定済み — 二重定義しない）"
+      - "QT-9: 更新・削除のアトミック性 — TOCTOU 0・DynamoDB 呼出 各 1 回（BR-007/RF-07）"
+    Data-Classification: "public 相当 — PII なし。ただし書込面は意図経路強制（QT-4）で保護し無差別な直接書込を遮断"
+    Resiliency:
+      - "ステートレス（Lambda 実行モデル前提 — 状態は DynamoDB のみ）"
+      - "条件付き書込（attribute_exists）で存在判定と書込をアトミック化（QT-9 — BR-007）"
+      - "未処理例外は degrade: 500 固定ボディ（BR-012）+ 構造化ログへ stack 出力（D-6）"
+      - "リトライ/冪等性は API 別に api-specification.md（本ステージ版）NFR Annotations に規定"
+    Observability:
+      - "構造化ログ: AWS Lambda Powertools for TypeScript Logger（D-6）。必須フィールド = method / path / status / requestId、エラー時 stack。Hono ミドルウェア接続は code-generation"
+      - "アラーム 4 種（Lambda Errors / Duration p95、API GW 5xx / Latency p99）+ SNS 通知（D-4/D-5。リソース定義は infrastructure-design）"
+      - "400/403 はクライアント起因としてエラーアラーム対象外（RF-04 の誤分類解消が前提）"
+    Scalability: "Lambda 同時実行の自動スケール + DynamoDB オンデマンド（C-1 — BP-1 据置。256MB/30s も変更なし。デモ負荷で制約なし）"
+    Security:
+      - "オリジン検証ミドルウェア（BR-013 — D-1/D-2。本番値は Secrets Manager 動的参照のみ、dev 値は C-5 の解釈で管理）"
+      - "入力検証は CMP-003 の zod schema を API 境界で強制（BR-014 — 強制点の単一性）"
+      - "IAM: GetItem / PutItem / UpdateItem / DeleteItem / Scan の 5 アクション限定（QT-5 — infrastructure テストで assert）"
+      - "エラー情報の非開示（BR-012 — SECURITY-09 維持）"
+    Tech-Stack-Deltas:
+      - "hono/logger → Powertools Logger へ置換（D-6 — SECURITY-03 コメントとのドリフト解消 AR-O4）"
+      - "Vitest 3 への更新対象（RF-18）。zod は 3 系維持（OOS-6 — C-8）"
+
+---
+
+Component:
+  Id: CMP-003
+  Name: "Shared Contract"
+  Unit: UNIT-001   # todo-app（units-generation で追記 — units.md 参照）
+  Behaviour-summary: >-
+    CMP-001 と CMP-002 の間の合意（コントラクト）の単一ソース（RF-03 で新設する @todo-ai-dlc/shared）。
+    Todo の形状・入力型・検証 schema・制約定数を一元定義し、frontend/backend 間のコントラクト乖離を
+    構造的に排除する。実行時の振る舞いを持たない定義専用コンポーネント。
+  Responsibilities:
+    - "Todo / CreateTodoInput / UpdateTodoInput の型定義の単一ソース（リポジトリ内 1 箇所のみ — RF-03 受入基準）"
+    - "zod schema（CreateTodoSchema / UpdateTodoSchema）の提供（強制点は CMP-002）"
+    - "制約定数（title 最大 200 / description 最大 1000）の単一定義（プロダクションコード内のリテラルはここ 1 箇所のみ）"
+  Boundaries:
+    - "実行時の振る舞い・業務ロジックを所有しない — 検証の強制は CMP-002、入力補助は CMP-001 の責務"
+    - "Todo エンティティ（ENT-001）を所有しない — 定義の置き場であってライフサイクルの所有者ではない（Q2=a）"
+    - "他コンポーネントへ依存しない — 依存グラフの葉（CMP-001 → CMP-003 ← CMP-002 の星形）"
+  Source:
+    Requirements:
+      - RF-03
+      - NFR-004
+      - NFR-006   # CI の typecheck / test 対象に shared を含む（CI 自体は非コンポーネント要素）
+    Business-Transactions: []
+  Dependency: []
+  Dependent-Component:
+    - Component:
+        Id: CMP-001
+        Name: "Todo Frontend"
+        Interaction: "型と制約定数（200/1000）を workspace: 依存で import する"
+    - Component:
+        Id: CMP-002
+        Name: "Todo Backend API"
+        Interaction: "zod schema を import し z.infer で型導出する"
+  Entities: {}
+  Functional-Design-References:   # functional-design で追記（copy-forward 拡張 — 2026-06-10）
+    Entities:
+      - "ENT-001 の形状・制約値（200/1000）の定義置き場（所有はしない — entities.yaml の constraints 参照）"
+    Rules:
+      - "BR-014 — 公開面の規則の対象（schema は CMP-002 専用公開面、CMP-001 へは型 + 制約定数のみ — Q4=a）"
+      - "BR-001 / BR-002 — 制約定数（200/1000）の単一定義元として参照される"
+    Workflows: []
+    State-Machines: []
+    APIs: []   # 実行時インターフェースなし（定義専用）
+    Decisions:
+      - "Q4=a: 公開面は『CMP-001 = 型 + 制約定数 / CMP-002 = 検証 schema + 型導出』に確定（RF-03 既決の維持）"
+      - "Q5=a: ビルドなし（ソース直接参照）。消費側ツールチェーンが直接取り込む。型検査は CI（RF-01）の全 workspace 型検査で担保。build 順序の先頭配置（unit-dependencies.md）は型検査順序として自明に満たされる。具体のパッケージ構成は code-generation の管轄"
+      - "Q3=a: テストコードの境界値リテラル（200/1000）は共有定数から導出せず直書きを維持（共有定数の誤変更を検知する独立検証点）"
+  NFR-Annotations:   # nfr-design で追記（copy-forward 拡張 — 2026-06-10。正は nfr-specification.md）
+    Quality-Targets:
+      - "QT-7: CI の typecheck / test 対象（全 workspace の一部として — RF-01 受入基準。型乖離の構造的防止 = RF-03）"
+      - "QT-8: Renovate 管理下の依存（zod 3 系のみ — メジャー更新は OOS-6 で凍結）"
+    Data-Classification: "public — 公開リポジトリのソースコード（型・schema・制約定数のみ）"
+    Resiliency: []   # runtime なし — 定義専用コンポーネントのため該当なし
+    Observability: []   # runtime なし — 該当なし
+    Scalability: "該当なし（runtime なし）"
+    Security:
+      - "secrets・環境依存値の持込禁止（定義専用パッケージの規律。dev ヘッダ値も置かない — 注入はローカル構成側 D-1）"
+    Tech-Stack-Deltas: []   # 新設パッケージ（RF-03）— ビルドなし・ソース直接参照は functional-design Q5=a で確定済み

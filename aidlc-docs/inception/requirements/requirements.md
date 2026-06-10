@@ -1,5 +1,7 @@
 # Requirements Document
 
+> **Note**: 本ドキュメントは v1（初期構築時）の記録です。最新の設計の正は `org-ai-kb/aidlc-docs/intent-001-refactor-todo-app/` 配下を参照してください。
+
 ## Intent Analysis
 
 | Item | Value |

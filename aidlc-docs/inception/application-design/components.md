@@ -1,5 +1,7 @@
 # Components
 
+> **Note**: 本ドキュメントは v1（初期構築時）の記録です。最新の設計の正は `org-ai-kb/aidlc-docs/intent-001-refactor-todo-app/` 配下を参照してください。
+
 ## Component Overview
 
 | Component | Package | Purpose |
@@ -7,7 +9,7 @@
 | **TodoApp** | frontend | React SPA のルートコンポーネント |
 | **TodoList** | frontend | TODO 一覧の表示・管理 |
 | **TodoItem** | frontend | 個別 TODO アイテムの表示・操作 |
-| **TodoForm** | frontend | TODO 作成・編集フォーム |
+| **TodoForm** | frontend | TODO 作成専用フォーム（編集は TodoItem のインライン編集） |
 | **TodoAPI** | frontend | Backend API との通信レイヤー |
 | **TodoRouter** | backend | Hono ルーター（REST API エンドポイント定義） |
 | **TodoHandler** | backend | リクエストハンドラー（バリデーション・レスポンス） |
@@ -40,7 +42,7 @@
   - 編集モードの切り替え
 
 #### TodoForm
-- **Purpose**: TODO の新規作成・編集用フォーム
+- **Purpose**: TODO の新規作成専用フォーム（編集は TodoItem のインライン編集 UI が担う — RF-22① 現状一致）
 - **Responsibilities**:
   - タイトル・説明の入力フォーム
   - フォームバリデーション（空欄チェック）

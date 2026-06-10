@@ -1,5 +1,7 @@
 # Application Design - Consolidated
 
+> **Note**: 本ドキュメントは v1（初期構築時）の記録です。最新の設計の正は `org-ai-kb/aidlc-docs/intent-001-refactor-todo-app/` 配下を参照してください。
+
 ## Project Structure
 
 ```
@@ -75,7 +77,7 @@ todo-ai-dlc/
 - `TodoApp` - ルートコンポーネント、state 管理
 - `TodoList` - 一覧表示
 - `TodoItem` - 個別アイテム表示・操作
-- `TodoForm` - 作成・編集フォーム
+- `TodoForm` - 作成専用フォーム（編集は `TodoItem` のインライン編集 UI が担う — RF-22① 現状一致）
 - `TodoAPI` - Backend API 通信レイヤー
 
 **Backend (3)**:
@@ -94,7 +96,7 @@ todo-ai-dlc/
 | 状態管理 | React useState | 基本 CRUD にはシンプルで十分 |
 | API 通信 | fetch API | 追加依存なし、モダンブラウザ標準 |
 | ID 生成 | ULID | ソート可能な一意 ID |
-| DynamoDB SDK | v3 DocumentClient | Tree-shakeable、Lambda バンドルサイズ最適化 |
+| DynamoDB SDK | v3 DocumentClient | esbuild バンドルでは `externalModules: ["@aws-sdk/*"]` で除外し、Lambda ランタイム同梱の SDK に依存する（バンドルには含めない — RF-22③ 現状一致） |
 | Backend Framework | Hono | 軽量、Web Standards API ベース |
 | CDK Construct Level | L2 Constructs | 適度な抽象化、ベストプラクティス適用 |
 
@@ -105,7 +107,7 @@ todo-ai-dlc/
 | `POST` | `/api/todos` | `create` | TODO 作成 |
 | `GET` | `/api/todos` | `list` | TODO 一覧取得 |
 | `GET` | `/api/todos/:id` | `get` | TODO 個別取得 |
-| `PUT` | `/api/todos/:id` | `update` | TODO 更新 |
+| `PUT` | `/api/todos/:id` | `update` | TODO 更新（部分更新意味論 — 送信したフィールドのみ更新。正式仕様は v2 `api-specification.md` API-004 — RF-22②） |
 | `DELETE` | `/api/todos/:id` | `remove` | TODO 削除 |
 
 ## Shared Types

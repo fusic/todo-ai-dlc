@@ -1,0 +1,198 @@
+# rules.yaml — functional-design / unit: todo-app (UNIT-001)
+# Owner: aidlc-systems-architect-agent / 2026-06-10
+#
+# source of truth: 業務ルールは本ファイルが正（functional-spec.md の Rules Summary は本ファイルから導出）。
+# 決定の反映: Q1=a（BR-010 の強制点 = CMP-002）/ Q2=a（CORS 0 箇所 — ルールではなく api-specification.md の通信前提に記録）/
+#             Q3=a（テスト境界値リテラルは独立検証点 — BR-001/002 の note）/ Q4=a（BR-014 強制点の単一性）。
+# 規律: technology-agnostic。検証 schema・永続化操作は論理名で記述（実装製品名なし）。
+# story 参照は fallback（unit-story-map.md — BT を story 相当とする）。
+
+- id: BR-001
+  statement: "title は必須で、1 文字以上・200 文字以下でなければならない"
+  category: validation
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-001, API-004]
+  trigger: "TODO の作成（API-001）または更新（API-004）で title が入力に含まれるとき（作成では常に必須、更新では存在する場合のみ評価）"
+  logic: "IF title が欠落（作成時）または空文字、もしくは 200 文字を超える THEN 入力全体を拒否する。上限 200 は CMP-003 の共有定数を参照する（リテラルの単一定義 — RF-03。テストコードの境界値リテラルは独立検証点として直書きを許容する — Q3=a）"
+  violation: "reject — 400 とフィールド別エラー詳細を返す（api-specification.md 共通エラー応答）。永続化は行わない"
+  source:
+    requirements: [FR-001, FR-003, RF-03]
+    stories: [BT-1, BT-3]
+
+- id: BR-002
+  statement: "description は任意で、指定する場合は 1000 文字以下でなければならない"
+  category: validation
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-001, API-004]
+  trigger: "TODO の作成（API-001）または更新（API-004）で description が入力に含まれるとき"
+  logic: "IF description が 1000 文字を超える THEN 入力全体を拒否する。欠落は有効（任意項目）。上限 1000 は CMP-003 の共有定数を参照する（BR-001 と同じ規律）"
+  violation: "reject — 400 とフィールド別エラー詳細を返す。永続化は行わない"
+  source:
+    requirements: [FR-001, FR-003, RF-03]
+    stories: [BT-1, BT-3]
+
+- id: BR-003
+  statement: "id はサーバー（CMP-002）が ULID 形式で生成し、クライアントは指定できない"
+  category: constraint
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-001]
+  trigger: "TODO の作成（API-001）が検証を通過したとき"
+  logic: "IF 作成入力が有効 THEN CMP-002 が ULID（26 文字、辞書順 = 生成時刻順）を新規生成して id に設定する。作成入力スキーマに id は存在しない（クライアント指定値は受け付けない）"
+  violation: "該当なし（入力面に id が存在しないため違反経路がない）。生成失敗は BR-012 の 500 系として扱う"
+  source:
+    requirements: [FR-001]
+    stories: [BT-1]
+
+- id: BR-004
+  statement: "completed は作成時に false で初期化され、クライアントの作成入力では指定できない"
+  category: constraint
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-001]
+  trigger: "TODO の作成（API-001）が検証を通過したとき"
+  logic: "IF 作成入力が有効 THEN CMP-002 が completed = false を設定する。作成入力スキーマに completed は存在しない。完了状態の変更は更新（API-004）でのみ行える"
+  violation: "該当なし（入力面に completed が存在しないため違反経路がない）"
+  source:
+    requirements: [FR-001]
+    stories: [BT-1, BT-4]
+
+- id: BR-005
+  statement: "createdAt / updatedAt はサーバー（CMP-002）が ISO 8601 形式で付与・更新し、クライアントは指定できない"
+  category: calculation
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-001, API-004]
+  trigger: "TODO の作成（API-001）または更新（API-004）が検証・存在判定を通過したとき"
+  logic: "IF 作成 THEN createdAt = updatedAt = サーバー現在時刻。IF 更新が成功 THEN updatedAt のみサーバー現在時刻に更新する（createdAt は作成後不変）。空オブジェクト更新（BR-006）でも updatedAt は更新される"
+  violation: "該当なし（入力面にタイムスタンプが存在しないため違反経路がない）"
+  source:
+    requirements: [FR-001, FR-003]
+    stories: [BT-1, BT-3, BT-4]
+
+- id: BR-006
+  statement: "更新（API-004）は部分更新意味論を持ち、空オブジェクトも有効な入力である"
+  category: policy
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-004]
+  trigger: "更新（API-004）の入力検証時"
+  logic: "IF 入力に title / description / completed のいずれかが存在 THEN 存在するフィールドのみを更新する。IF 入力が空オブジェクト THEN 有効入力として受理し updatedAt のみ更新する（BR-005）。空オブジェクトの拒否は後方互換違反のため行わない（OOS-3）。この意味論を API 仕様として明文化することが RF-22② の v2 側対応である"
+  violation: "該当なし（受理側の規則）。未知フィールドは無視する（既存コントラクトの寛容な受理を維持）"
+  source:
+    requirements: [FR-003, RF-22]
+    stories: [BT-3, BT-4]
+
+- id: BR-007
+  statement: "存在しない id への個別取得・更新・削除は 404 を返し、更新が新規レコードを作成してはならない"
+  category: constraint
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-003, API-004, API-005]
+  trigger: "id 指定の操作（API-003 / API-004 / API-005）の実行時"
+  logic: "IF 指定 id のレコードが存在しない THEN 404 を返す。更新・削除では存在判定と書込を単一のアトミックな条件付き書込操作で行い（RF-07）、判定と書込の間の競合により更新が upsert（新規作成）として成立する経路を排除する。id の形式検証は行わない（任意文字列は存在判定により 404 に到達する — 現状コントラクト維持）"
+  violation: "reject — 404 + エラーメッセージ（api-specification.md 共通エラー応答）。レコードの新規作成・変更は行わない"
+  source:
+    requirements: [FR-003, FR-004, RF-07]
+    stories: [BT-3, BT-4, BT-5, BT-6]
+
+- id: BR-008
+  statement: "構文的に不正なリクエストボディ（JSON として解釈不能）はクライアントエラー 400 として扱う"
+  category: validation
+  applies-to:
+    component-id: CMP-002
+    api-id: [API-001, API-004]
+  trigger: "ボディを持つ操作（API-001 / API-004）のボディ解釈時"
+  logic: "IF ボディが JSON として解釈できない THEN サーバーエラー（500）ではなく 400 を返す（RF-04 — クライアント起因エラーの誤分類はアラーム RF-15 のノイズ源となるため）。有効入力の応答は不変"
+  violation: "reject — 400 + エラー JSON。検証（BR-001/002）には進まない"
+  source:
+    requirements: [RF-04]
+    stories: [BT-1, BT-3, BT-4]
+
+- id: BR-009
+  statement: "不正ボディ かつ 存在しない id の複合ケースでは 400 が 404 に優先する"
+  category: policy
+  applies-to:
+    component-id: CMP-002
+    api-id: [API-004]
+  trigger: "更新（API-004）で入力検証違反（BR-001/002/008）と存在しない id（BR-007）が同時に成立するとき"
+  logic: "IF 入力が不正 かつ id が存在しない THEN 400 を返す（評価順序: ボディ解釈 → 入力検証 → 条件付き書込。BR-007 のアトミック化により処理順序が「検証 → 書込」となるため）。BP-1 許容変更 4 として要件で承認済み"
+  violation: "reject — 400（404 ではなく）"
+  source:
+    requirements: [RF-07, BP-1]
+    stories: [BT-3, BT-4]
+
+- id: BR-010
+  statement: "一覧（API-002）は createdAt 降順・tie は id 降順でソート済みの配列を返し、順序保証は API コントラクトの一部である"
+  category: constraint
+  applies-to:
+    component-id: CMP-002
+    entity-id: ENT-001
+    api-id: [API-002]
+  trigger: "一覧取得（API-002）の応答生成時"
+  logic: "IF 一覧を返す THEN createdAt 降順（新しい順）でソートし、同一 createdAt（ミリ秒一致）の tie は id 降順で決定的に並べる（ULID は辞書順 = 時系列のため createdAt 降順と単調整合 — 追加属性なしで決定性を得る）。永続化層の走査順は不定であるため、ソートは CMP-002 が応答生成時に必ず行う。実現箇所は CMP-002 に確定（Q1=a）。CMP-001 は防衛的ソートを行わない（二重実装の禁止 — RF-12 と同じ思想）"
+  violation: "該当なし（応答生成の規則）。順序が崩れた応答はコントラクト違反としてテスト（E2E / unit）で fail する"
+  source:
+    requirements: [FR-002, RF-06]
+    stories: [BT-2]
+
+- id: BR-011
+  statement: "ミューテーション（作成・編集・トグル・削除）の失敗はユーザーに可視のエラーとして表示され、無言で握り潰されてはならない"
+  category: policy
+  applies-to:
+    component-id: CMP-001
+    api-id: [API-001, API-004, API-005]
+  trigger: "CMP-001 のミューテーション呼出（API-001 / API-004 / API-005）が失敗応答または通信エラーになったとき"
+  logic: "IF ミューテーションが失敗 THEN CMP-001 はユーザーにエラーメッセージを表示し、失敗を未処理のまま放置しない（未処理 rejection を発生させない）。一覧取得（API-002）の失敗は既存のエラー状態表示を維持する"
+  violation: "warn — ユーザーへのエラー表示（操作は完了しない）。表示されないことはテストで fail する（RF-05 受入基準）"
+  source:
+    requirements: [RF-05, FR-001, FR-003, FR-004]
+    stories: [BT-1, BT-3, BT-4, BT-5]
+
+- id: BR-012
+  statement: "未処理の内部エラーは汎用メッセージの 500 で応答し、内部情報（スタックトレース等）をクライアントに開示しない。詳細はサーバー側ログにのみ記録する"
+  category: policy
+  applies-to:
+    component-id: CMP-002
+    api-id: [API-001, API-002, API-003, API-004, API-005, API-006]
+  trigger: "CMP-002 で未処理例外が発生したとき"
+  logic: "IF 未処理例外 THEN クライアントには固定の汎用エラーボディ（現行コントラクトどおり）で 500 を返し、スタックトレース等の詳細はサーバー側ログへ出力する（RF-11 — 調査可能性と非開示の両立。SECURITY-09 維持）"
+  violation: "degrade — 500 応答。内部情報がボディに含まれることはコントラクト違反"
+  source:
+    requirements: [RF-11, NFR-003]
+    stories: [BT-1, BT-2, BT-3, BT-4, BT-5, BT-6, BT-7]
+
+- id: BR-013
+  statement: "意図経路（本番 = CDN 経由の同一オリジン）を経ないバックエンド直接アクセスは 403 で拒否する"
+  category: authorization
+  applies-to:
+    component-id: CMP-002
+    api-id: [API-001, API-002, API-003, API-004, API-005, API-006]
+  trigger: "CMP-002 への全リクエストの受信時"
+  logic: "IF リクエストが意図経路の証明（CDN がオリジンへ付与するカスタムヘッダの一致）を持たない THEN 403 で拒否する（RF-16）。意図経路（本番 = CDN 経由）とローカル開発経路（プロキシ / コンテナ環境）では全 BT が不変で動作しなければならない。ヘッダ値は構成物に平文で保持しない。ローカル経路での検証無効化/ヘッダ注入の方式と Secret 可視性の扱いは nfr-design / infrastructure-design で決定する（api-specification.md OQ-1）"
+  violation: "reject — 403。意図経路・ローカル経路での誤拒否（特にヘルスチェック API-006 の 403 化）は回帰であり、E2E の BT-7 アサーションで検知する（RF-02）"
+  source:
+    requirements: [RF-16, NFR-003, BP-1]
+    stories: [BT-1, BT-2, BT-3, BT-4, BT-5, BT-6, BT-7]
+
+- id: BR-014
+  statement: "業務ルールの強制点は CMP-002 のみであり、CMP-001 は防衛線ではない。検証 schema は CMP-002 専用の公開面、CMP-001 へは型と制約定数のみを公開する"
+  category: policy
+  applies-to:
+    component-id: CMP-003
+    entity-id: ENT-001
+  trigger: "コントラクト定義（CMP-003）の公開面を消費するとき（設計・実装時の構造規則）"
+  logic: "IF CMP-001 が CMP-003 を参照する THEN 型と制約定数（200/1000）のみを import する（文字数の入力補助は UX 目的）。IF CMP-002 が参照する THEN 検証 schema を import し型を導出して API 境界で強制する。検証が 2 箇所で走る構成（強制点の曖昧化）を禁止する（Q4=a — RF-03 既決の維持）"
+  violation: "reject — 設計レビュー / コードレビューで却下する（実行時挙動ではなく構造の規則）"
+  source:
+    requirements: [RF-03, NFR-004]
+    stories: []

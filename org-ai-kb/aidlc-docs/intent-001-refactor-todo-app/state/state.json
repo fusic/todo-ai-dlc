@@ -1,0 +1,410 @@
+{
+  "intent": "refactor-todo-app",
+  "created": "2026-06-09T22:42:42Z",
+  "updated": "2026-06-10T12:43:11Z",
+  "stages": [
+    {
+      "stage": "reverse-engineering",
+      "status": "complete",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "reviewIterations": 0,
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "business-overview.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "architecture.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "code-structure.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "api-documentation.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "technology-stack.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "dependencies.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/inception/reverse-engineering/"
+        }
+      ]
+    },
+    {
+      "stage": "requirements-analysis",
+      "status": "complete",
+      "owner": "aidlc-product-manager-agent",
+      "contributors": [
+        "aidlc-systems-architect-agent"
+      ],
+      "reviewer": "aidlc-product-lead-agent",
+      "reviewIterations": 0,
+      "contributions": [
+        {
+          "persona": "aidlc-systems-architect-agent",
+          "contributed": true
+        }
+      ],
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/inception/requirements-analysis/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/inception/requirements-analysis/"
+        },
+        {
+          "name": "requirements.md",
+          "locationRelativeToIntentRoot": "/stages/inception/requirements-analysis/"
+        },
+        {
+          "name": "aidlc-systems-architect-agent-contribution.md",
+          "locationRelativeToIntentRoot": "/stages/inception/requirements-analysis/"
+        },
+        {
+          "name": "aidlc-product-lead-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/inception/requirements-analysis/"
+        }
+      ]
+    },
+    {
+      "stage": "domain-design",
+      "status": "complete",
+      "owner": "aidlc-app-architect-agent",
+      "contributors": [
+        "aidlc-product-manager-agent"
+      ],
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "reviewIterations": 0,
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/inception/domain-design/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/inception/domain-design/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/inception/domain-design/"
+        },
+        {
+          "name": "components.md",
+          "locationRelativeToIntentRoot": "/stages/inception/domain-design/"
+        },
+        {
+          "name": "aidlc-product-manager-agent-contribution.md",
+          "locationRelativeToIntentRoot": "/stages/inception/domain-design/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/inception/domain-design/"
+        }
+      ],
+      "contributions": [
+        {
+          "persona": "aidlc-product-manager-agent",
+          "contributed": true
+        }
+      ]
+    },
+    {
+      "stage": "units-generation",
+      "status": "complete",
+      "owner": "aidlc-app-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "reviewIterations": 0,
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/inception/units-generation/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/inception/units-generation/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/inception/units-generation/"
+        },
+        {
+          "name": "units.md",
+          "locationRelativeToIntentRoot": "/stages/inception/units-generation/"
+        },
+        {
+          "name": "unit-dependencies.md",
+          "locationRelativeToIntentRoot": "/stages/inception/units-generation/"
+        },
+        {
+          "name": "unit-story-map.md",
+          "locationRelativeToIntentRoot": "/stages/inception/units-generation/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/inception/units-generation/"
+        }
+      ]
+    },
+    {
+      "stage": "functional-design",
+      "unit": "todo-app",
+      "status": "complete",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "reviewIterations": 0,
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "entities.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "rules.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "api-specification.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "functional-spec.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "unit.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "unit-story-map.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/functional-design/"
+        }
+      ]
+    },
+    {
+      "stage": "nfr-design",
+      "unit": "todo-app",
+      "status": "complete",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "reviewIterations": 0,
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "nfr-specification.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "unit.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "api-specification.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/nfr-design/"
+        }
+      ]
+    },
+    {
+      "stage": "infrastructure-design",
+      "unit": "todo-app",
+      "status": "complete",
+      "owner": "aidlc-systems-architect-agent",
+      "reviewer": "aidlc-architecture-reviewer-agent",
+      "reviewIterations": 0,
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/infrastructure-design/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/infrastructure-design/"
+        },
+        {
+          "name": "infrastructure-specification.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/infrastructure-design/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/infrastructure-design/"
+        },
+        {
+          "name": "unit.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/infrastructure-design/"
+        },
+        {
+          "name": "aidlc-architecture-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/infrastructure-design/"
+        }
+      ]
+    },
+    {
+      "stage": "code-generation",
+      "unit": "todo-app",
+      "status": "complete",
+      "owner": "aidlc-sw-dev-engineer-agent",
+      "reviewer": "aidlc-code-reviewer-agent",
+      "reviewIterations": 0,
+      "outputs": [
+        {
+          "name": "questions.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "plan.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "package.json",
+          "locationRelativeToIntentRoot": "../../../packages/shared/"
+        },
+        {
+          "name": "tsconfig.json",
+          "locationRelativeToIntentRoot": "../../../packages/shared/"
+        },
+        {
+          "name": "vitest.config.ts",
+          "locationRelativeToIntentRoot": "../../../packages/shared/"
+        },
+        {
+          "name": "constants.ts",
+          "locationRelativeToIntentRoot": "../../../packages/shared/src/"
+        },
+        {
+          "name": "types.ts",
+          "locationRelativeToIntentRoot": "../../../packages/shared/src/"
+        },
+        {
+          "name": "schemas.ts",
+          "locationRelativeToIntentRoot": "../../../packages/shared/src/"
+        },
+        {
+          "name": "index.ts",
+          "locationRelativeToIntentRoot": "../../../packages/shared/src/"
+        },
+        {
+          "name": "schemas.test.ts",
+          "locationRelativeToIntentRoot": "../../../packages/shared/src/"
+        },
+        {
+          "name": "ci.yml",
+          "locationRelativeToIntentRoot": "../../../.github/workflows/"
+        },
+        {
+          "name": "playwright.config.ts",
+          "locationRelativeToIntentRoot": "../../../"
+        },
+        {
+          "name": "todo-smoke.spec.ts",
+          "locationRelativeToIntentRoot": "../../../e2e/"
+        },
+        {
+          "name": "index.test.ts",
+          "locationRelativeToIntentRoot": "../../../packages/backend/src/"
+        },
+        {
+          "name": "originVerify.ts",
+          "locationRelativeToIntentRoot": "../../../packages/backend/src/middleware/"
+        },
+        {
+          "name": "originVerify.test.ts",
+          "locationRelativeToIntentRoot": "../../../packages/backend/src/middleware/"
+        },
+        {
+          "name": "todo-stack.ts",
+          "locationRelativeToIntentRoot": "../../../packages/infrastructure/lib/"
+        },
+        {
+          "name": "todo-stack.test.ts",
+          "locationRelativeToIntentRoot": "../../../packages/infrastructure/test/"
+        },
+        {
+          "name": "renovate.json",
+          "locationRelativeToIntentRoot": "../../../"
+        },
+        {
+          "name": "pnpm-workspace.yaml",
+          "locationRelativeToIntentRoot": "../../../"
+        },
+        {
+          "name": "implementation-map.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "aidlc-systems-architect-agent-contribution.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "components.yaml",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "unit.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        },
+        {
+          "name": "aidlc-code-reviewer-agent-review.md",
+          "locationRelativeToIntentRoot": "/stages/construction/todo-app/code-generation/"
+        }
+      ],
+      "contributors": [
+        "aidlc-systems-architect-agent"
+      ],
+      "contributions": [
+        {
+          "persona": "aidlc-systems-architect-agent",
+          "contributed": true
+        }
+      ]
+    }
+  ]
+}

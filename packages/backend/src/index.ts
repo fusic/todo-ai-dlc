@@ -1,18 +1,57 @@
+import { randomUUID } from "node:crypto";
+import { Logger } from "@aws-lambda-powertools/logger";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import { handle } from "hono/aws-lambda";
+import { originVerify } from "./middleware/originVerify";
 import { todosRoute } from "./routes/todos";
 
-const app = new Hono();
+// QT-6（RF-10 / D-6）: 構造化ログ — AWS Lambda Powertools Logger（JSON パース可能率 100%）
+const logger = new Logger({ serviceName: "todo-backend" });
 
-// Middleware (SECURITY-03: structured logging)
-app.use("*", cors());
-app.use("*", logger());
+type AppEnv = {
+	Variables: {
+		requestId: string;
+	};
+};
 
-// Global error handler (SECURITY-15: fail-safe defaults, SECURITY-09: no stack traces)
+// requestId: Lambda 実行時は awsRequestId、ローカル実行時は UUID を採番（D-6 必須フィールド）
+function resolveRequestId(env: unknown): string {
+	const lambdaContext = (env as { lambdaContext?: { awsRequestId?: string } } | undefined)
+		?.lambdaContext;
+	return lambdaContext?.awsRequestId ?? randomUUID();
+}
+
+const app = new Hono<AppEnv>();
+
+// CORS は定義しない（RF-12 / functional Q2=a — 0 箇所）:
+// 既知クライアントは同梱 SPA のみで、本番 = CDN 経由・ローカル = Vite プロキシ経由の同一オリジン `/api`。
+
+// アクセスログ（RF-10）: method / path / status / requestId を JSON で出力（QT-6）
+app.use("*", async (c, next) => {
+	c.set("requestId", resolveRequestId(c.env));
+	await next();
+	logger.info("request completed", {
+		method: c.req.method,
+		path: c.req.path,
+		status: c.res.status,
+		requestId: c.get("requestId"),
+	});
+});
+
+// オリジン検証（BR-013 / RF-16 / QT-4 — 常時有効・フェイルクローズ）。
+// アクセスログの後段に置き、403 拒否もアクセスログに記録する（直接アクセス試行の観測性）。
+app.use("*", originVerify);
+
+// Global error handler（BR-012 / RF-11）: クライアントには固定の汎用 500 ボディのみ。
+// stack を含むエラー詳細はサーバー側の構造化ログにのみ記録する（調査可能性と非開示の両立）。
 app.onError((err, c) => {
-	console.error("Unhandled error:", err.message);
+	logger.error("unhandled error", {
+		method: c.req.method,
+		path: c.req.path,
+		status: 500,
+		requestId: c.get("requestId"),
+		error: err,
+	});
 	return c.json({ error: "Internal server error" }, 500);
 });
 

@@ -1,5 +1,10 @@
+import {
+	DESCRIPTION_MAX_LENGTH,
+	TITLE_MAX_LENGTH,
+	type Todo,
+	type UpdateTodoInput,
+} from "@todo-ai-dlc/shared";
 import { useState } from "react";
-import type { Todo, UpdateTodoInput } from "../types/todo";
 
 interface TodoItemProps {
 	todo: Todo;
@@ -8,6 +13,13 @@ interface TodoItemProps {
 	onDelete: (id: string) => Promise<void>;
 }
 
+// RF-08（WF-002）: createdAt の人間可読表示。タイムゾーンに依存しない決定的なテストのため
+// Intl.DateTimeFormat を単一の整形点として公開する
+export const createdAtFormatter = new Intl.DateTimeFormat("ja-JP", {
+	dateStyle: "medium",
+	timeStyle: "short",
+});
+
 export function TodoItem({ todo, onToggle, onUpdate, onDelete }: TodoItemProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [editTitle, setEditTitle] = useState(todo.title);
@@ -15,11 +27,16 @@ export function TodoItem({ todo, onToggle, onUpdate, onDelete }: TodoItemProps) 
 
 	async function handleSave() {
 		if (!editTitle.trim()) return;
-		await onUpdate(todo.id, {
-			title: editTitle.trim(),
-			description: editDescription.trim() || undefined,
-		});
-		setIsEditing(false);
+		try {
+			await onUpdate(todo.id, {
+				title: editTitle.trim(),
+				description: editDescription.trim() || undefined,
+			});
+			setIsEditing(false);
+		} catch {
+			// BR-011（RF-05）: 失敗は親（App）がユーザー可視のエラーとして表示する。
+			// 編集モードを維持して再保存できるようにする
+		}
 	}
 
 	function handleCancel() {
@@ -39,14 +56,14 @@ export function TodoItem({ todo, onToggle, onUpdate, onDelete }: TodoItemProps) 
 					value={editTitle}
 					onChange={(e) => setEditTitle(e.target.value)}
 					data-testid={`todo-item-${todo.id}-edit-title`}
-					maxLength={200}
+					maxLength={TITLE_MAX_LENGTH}
 					className="mb-2 w-full rounded border border-gray-300 px-3 py-1"
 				/>
 				<textarea
 					value={editDescription}
 					onChange={(e) => setEditDescription(e.target.value)}
 					data-testid={`todo-item-${todo.id}-edit-description`}
-					maxLength={1000}
+					maxLength={DESCRIPTION_MAX_LENGTH}
 					rows={2}
 					className="mb-2 w-full rounded border border-gray-300 px-3 py-1"
 				/>
@@ -85,12 +102,13 @@ export function TodoItem({ todo, onToggle, onUpdate, onDelete }: TodoItemProps) 
 				className="h-5 w-5 rounded border-gray-300"
 			/>
 			<div className="flex-1">
-				<p
-					className={`text-lg ${todo.completed ? "text-gray-400 line-through" : "text-gray-900"}`}
-				>
+				<p className={`text-lg ${todo.completed ? "text-gray-400 line-through" : "text-gray-900"}`}>
 					{todo.title}
 				</p>
 				{todo.description && <p className="mt-1 text-sm text-gray-500">{todo.description}</p>}
+				<p data-testid={`todo-item-${todo.id}-created-at`} className="mt-1 text-xs text-gray-400">
+					作成: {createdAtFormatter.format(new Date(todo.createdAt))}
+				</p>
 			</div>
 			<div className="flex gap-2">
 				<button
