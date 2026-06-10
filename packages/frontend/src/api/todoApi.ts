@@ -1,4 +1,4 @@
-import type { CreateTodoInput, Todo, UpdateTodoInput } from "../types/todo";
+import type { CreateTodoInput, Todo, UpdateTodoInput } from "@todo-ai-dlc/shared";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 

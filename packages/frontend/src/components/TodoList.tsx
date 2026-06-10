@@ -1,4 +1,4 @@
-import type { Todo, UpdateTodoInput } from "../types/todo";
+import type { Todo, UpdateTodoInput } from "@todo-ai-dlc/shared";
 import { TodoItem } from "./TodoItem";
 
 interface TodoListProps {

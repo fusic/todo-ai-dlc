@@ -1,13 +1,13 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
-	DynamoDBDocumentClient,
 	DeleteCommand,
+	DynamoDBDocumentClient,
 	GetCommand,
 	PutCommand,
 	ScanCommand,
 	UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
-import type { Todo, UpdateTodoInput } from "../types/todo";
+import type { Todo, UpdateTodoInput } from "@todo-ai-dlc/shared";
 
 const client = new DynamoDBClient({
 	region: process.env.AWS_REGION ?? "ap-northeast-1",

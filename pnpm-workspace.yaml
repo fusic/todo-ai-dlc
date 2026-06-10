@@ -1,2 +1,9 @@
 packages:
   - "packages/*"
+
+# pnpm audit の個別 ignore（nfr-design C-6 運用 — pnpm v10 以降はここ、v9 は package.json の pnpm.auditConfig を読む。両方に同内容を維持する）
+# GHSA-5xrq-8626-4rwp: vitest UI server の任意ファイル読取（critical）。本リポジトリは vitest --ui を使用せず
+# CI/ローカルとも vitest run のみのため悪用経路なし。RF-18（P2: Vitest 3 >=3.2.6 への更新）で解消し次第削除する。
+auditConfig:
+  ignoreGhsas:
+    - GHSA-5xrq-8626-4rwp

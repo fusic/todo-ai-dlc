@@ -1,0 +1,112 @@
+# CI 検証ゲート（RF-01 / RF-02 — QT-7: lint / typecheck / test / cdk synth / pnpm audit / E2E の 6 種）
+# main に入るすべての変更はこのゲートを通過する（ブランチ保護の運用は README 参照）。
+# いずれかのジョブの失敗で CI 全体が fail する。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: lint (biome check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+
+  typecheck:
+    name: typecheck (tsc --noEmit, 全 workspace)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # shared を含む全 4 パッケージが対象（QT-7 / RF-03 — 型乖離の構造的防止）
+      - run: pnpm typecheck
+
+  test:
+    name: test (vitest run, 全 workspace)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  synth:
+    name: cdk synth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # DEP-O2: Source.asset(frontend/dist) が dist の存在を要求するため frontend build を先行させる
+      #（infrastructure-specification.md Deployment Strategy — 必須引き継ぎ）
+      - run: pnpm --filter @todo-ai-dlc/frontend build
+      - run: pnpm --filter @todo-ai-dlc/infrastructure synth
+
+  audit:
+    name: audit (pnpm audit --audit-level=high)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # high 以上の CVE で fail（QT-8 / D-3）。修正不能な上流 advisory は
+      # auditConfig.ignoreGhsas（package.json / pnpm-workspace.yaml — 理由コメント付き）で
+      # 個別 ignore し、Renovate の更新で解消され次第削除する（C-6 運用）
+      - run: pnpm audit --audit-level=high
+
+  e2e:
+    name: e2e (Playwright smoke — BT-1〜5 + BT-7)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browser (chromium)
+        run: pnpm exec playwright install --with-deps chromium
+      # 環境起動失敗とテスト失敗を区別するため、セットアップ（compose 起動 + readiness 待ち）を
+      # テスト実行と別ステップに分離する（nfr-design E2E スモークパターン）
+      - name: Start stack (docker compose — A-7)
+        run: docker compose up -d --build
+      - name: Wait for stack readiness (frontend → Vite proxy → backend /api/health)
+        run: timeout 180 bash -c 'until curl -fsS http://localhost:3000/api/health > /dev/null; do sleep 3; done'
+      - name: Run E2E smoke
+        run: pnpm test:e2e
+      - name: Upload Playwright report (失敗時のトレース調査用)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v

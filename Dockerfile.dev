@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copy workspace config and all package.json files for dependency caching
 COPY package.json pnpm-workspace.yaml ./
+COPY packages/shared/package.json packages/shared/
 COPY packages/backend/package.json packages/backend/
 COPY packages/frontend/package.json packages/frontend/
 COPY packages/infrastructure/package.json packages/infrastructure/

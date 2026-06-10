@@ -96,6 +96,12 @@
       "stage": "infrastructure-design",
       "presented": "unit todo-app の成果物サマリー（infrastructure-specification.md: 変更明細 CH-1〜CH-10 行参照付き / インフラテスト IT-1〜IT-10 / 命名確定 x-origin-verify・ORIGIN_VERIFY_SECRET、copy-forward 2 件削除 0 行）と reviewer 判定 READY（CH 行参照を実コード全件照合・完全一致、非ブロッキング指摘 I-1〜I-5）、process-checker PASS",
       "decision": "承認。指摘 5 件は成果物記録のまま code-generation へ進む"
+    },
+    {
+      "timestamp": "2026-06-10T08:47:16Z",
+      "stage": "code-generation",
+      "presented": "unit todo-app の owner plan.md（20 ステップ、P0: shared+CI+E2E / P1: RF-04〜13 / P2: IaC CH-1〜10+IT-1〜10 ほか、write-test-verify リズム）と clarification questions Q1-Q4（E2E 配置、依存更新範囲、フェーズ進行、v1 文書更新範囲）。実測ベースライン（38/45 pass・lint/build red）の補足込み",
+      "decision": "plan 承認。Q1: a（ルート直下 e2e/）、Q2: a（4 系統のみ + peer 随伴）、Q3: a（各フェーズ境界で停止・確認）、Q4: b（3 点修正 + 正の所在バナー）"
     }
   ]
 }

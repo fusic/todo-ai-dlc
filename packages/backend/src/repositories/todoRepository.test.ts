@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockSend = vi.fn();
 
@@ -26,9 +26,7 @@ describe("todoRepository", () => {
 
 	describe("findAll", () => {
 		it("should return all todos", async () => {
-			const items = [
-				{ id: "1", title: "Test", completed: false, createdAt: "", updatedAt: "" },
-			];
+			const items = [{ id: "1", title: "Test", completed: false, createdAt: "", updatedAt: "" }];
 			mockSend.mockResolvedValueOnce({ Items: items });
 
 			const result = await todoRepository.findAll();

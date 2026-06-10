@@ -1,7 +1,7 @@
 import { Hono } from "hono";
+import { handle } from "hono/aws-lambda";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { handle } from "hono/aws-lambda";
 import { todosRoute } from "./routes/todos";
 
 const app = new Hono();

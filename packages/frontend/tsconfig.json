@@ -5,7 +5,7 @@
 		"jsx": "react-jsx",
 		"outDir": "./dist",
 		"rootDir": "./src",
-		"types": ["vitest/globals"]
+		"types": ["vitest/globals", "vite/client"]
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist"]

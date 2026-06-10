@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
 import * as cdk from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
+import { describe, expect, it } from "vitest";
 import { TodoStack } from "../lib/todo-stack";
 
 describe("TodoStack", () => {

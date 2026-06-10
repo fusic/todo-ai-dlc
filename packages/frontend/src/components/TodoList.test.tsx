@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
+import type { Todo } from "@todo-ai-dlc/shared";
 import { describe, expect, it, vi } from "vitest";
-import type { Todo } from "../types/todo";
 import { TodoList } from "./TodoList";
 
 const mockTodos: Todo[] = [
@@ -22,36 +22,20 @@ const mockTodos: Todo[] = [
 
 describe("TodoList", () => {
 	it("renders empty state when no todos", () => {
-		render(
-			<TodoList todos={[]} onToggle={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />,
-		);
+		render(<TodoList todos={[]} onToggle={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
 		expect(screen.getByTestId("todo-list-empty")).toBeInTheDocument();
 		expect(screen.getByText("TODO がありません")).toBeInTheDocument();
 	});
 
 	it("renders todo items", () => {
-		render(
-			<TodoList
-				todos={mockTodos}
-				onToggle={vi.fn()}
-				onUpdate={vi.fn()}
-				onDelete={vi.fn()}
-			/>,
-		);
+		render(<TodoList todos={mockTodos} onToggle={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
 		expect(screen.getByTestId("todo-list")).toBeInTheDocument();
 		expect(screen.getByText("Todo 1")).toBeInTheDocument();
 		expect(screen.getByText("Todo 2")).toBeInTheDocument();
 	});
 
 	it("renders correct number of items", () => {
-		render(
-			<TodoList
-				todos={mockTodos}
-				onToggle={vi.fn()}
-				onUpdate={vi.fn()}
-				onDelete={vi.fn()}
-			/>,
-		);
+		render(<TodoList todos={mockTodos} onToggle={vi.fn()} onUpdate={vi.fn()} onDelete={vi.fn()} />);
 		expect(screen.getByTestId("todo-item-1")).toBeInTheDocument();
 		expect(screen.getByTestId("todo-item-2")).toBeInTheDocument();
 	});

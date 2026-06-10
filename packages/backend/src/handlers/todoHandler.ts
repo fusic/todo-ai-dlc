@@ -1,8 +1,8 @@
-import type { Context } from "hono";
+import type { Todo } from "@todo-ai-dlc/shared";
+import { CreateTodoSchema, UpdateTodoSchema } from "@todo-ai-dlc/shared/schemas";
+import type { Context, Env } from "hono";
 import { ulid } from "ulid";
 import { todoRepository } from "../repositories/todoRepository";
-import { CreateTodoSchema, UpdateTodoSchema } from "../types/todo";
-import type { Todo } from "../types/todo";
 
 export const todoHandler = {
 	async list(c: Context) {
@@ -10,7 +10,7 @@ export const todoHandler = {
 		return c.json(todos);
 	},
 
-	async get(c: Context) {
+	async get(c: Context<Env, "/:id">) {
 		const id = c.req.param("id");
 		const todo = await todoRepository.findById(id);
 		if (!todo) {
@@ -43,7 +43,7 @@ export const todoHandler = {
 		return c.json(created, 201);
 	},
 
-	async update(c: Context) {
+	async update(c: Context<Env, "/:id">) {
 		const id = c.req.param("id");
 		const existing = await todoRepository.findById(id);
 		if (!existing) {
@@ -63,7 +63,7 @@ export const todoHandler = {
 		return c.json(updated);
 	},
 
-	async remove(c: Context) {
+	async remove(c: Context<Env, "/:id">) {
 		const id = c.req.param("id");
 		const existing = await todoRepository.findById(id);
 		if (!existing) {

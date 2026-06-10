@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockRepository = {
 	findAll: vi.fn(),
@@ -76,9 +76,7 @@ describe("todoHandler", () => {
 
 	describe("POST /api/todos", () => {
 		it("should create a todo", async () => {
-			mockRepository.create.mockImplementationOnce((todo: unknown) =>
-				Promise.resolve(todo),
-			);
+			mockRepository.create.mockImplementationOnce((todo: unknown) => Promise.resolve(todo));
 
 			const res = await app.request("/api/todos", {
 				method: "POST",
@@ -94,9 +92,7 @@ describe("todoHandler", () => {
 		});
 
 		it("should create a todo with description", async () => {
-			mockRepository.create.mockImplementationOnce((todo: unknown) =>
-				Promise.resolve(todo),
-			);
+			mockRepository.create.mockImplementationOnce((todo: unknown) => Promise.resolve(todo));
 
 			const res = await app.request("/api/todos", {
 				method: "POST",

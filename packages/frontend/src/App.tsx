@@ -1,8 +1,8 @@
+import type { CreateTodoInput, Todo, UpdateTodoInput } from "@todo-ai-dlc/shared";
 import { useEffect, useState } from "react";
 import { todoApi } from "./api/todoApi";
 import { TodoForm } from "./components/TodoForm";
 import { TodoList } from "./components/TodoList";
-import type { CreateTodoInput, Todo, UpdateTodoInput } from "./types/todo";
 
 export default function App() {
 	const [todos, setTodos] = useState<Todo[]>([]);

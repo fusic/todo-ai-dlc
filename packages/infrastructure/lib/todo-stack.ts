@@ -1,17 +1,17 @@
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import * as cdk from "aws-cdk-lib";
+import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
+import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
-import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
-import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import type { Construct } from "constructs";
-import * as path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,7 +40,7 @@ export class TodoStack extends cdk.Stack {
 				NODE_OPTIONS: "--enable-source-maps",
 			},
 			bundling: {
-				format: lambda.OutputFormat.ESM,
+				format: OutputFormat.ESM,
 				minify: true,
 				sourceMap: true,
 				target: "node20",
@@ -53,10 +53,7 @@ export class TodoStack extends cdk.Stack {
 		todoTable.grantReadWriteData(todoFunction);
 
 		// --- API Gateway (HTTP API) ---
-		const lambdaIntegration = new HttpLambdaIntegration(
-			"TodoLambdaIntegration",
-			todoFunction,
-		);
+		const lambdaIntegration = new HttpLambdaIntegration("TodoLambdaIntegration", todoFunction);
 
 		const httpApi = new apigatewayv2.HttpApi(this, "TodoHttpApi", {
 			apiName: "TodoApi",
@@ -79,8 +76,7 @@ export class TodoStack extends cdk.Stack {
 			removalPolicy: cdk.RemovalPolicy.DESTROY,
 		});
 
-		const defaultStage = httpApi.defaultStage?.node
-			.defaultChild as apigatewayv2.CfnStage;
+		const defaultStage = httpApi.defaultStage?.node.defaultChild as apigatewayv2.CfnStage;
 		if (defaultStage) {
 			defaultStage.accessLogSettings = {
 				destinationArn: apiLogGroup.logGroupArn,
@@ -106,34 +102,29 @@ export class TodoStack extends cdk.Stack {
 		// --- CloudFront Distribution ---
 
 		// SECURITY-04: Security response headers
-		const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(
-			this,
-			"SecurityHeaders",
-			{
-				securityHeadersBehavior: {
-					contentSecurityPolicy: {
-						contentSecurityPolicy:
-							"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'",
-						override: true,
-					},
-					strictTransportSecurity: {
-						accessControlMaxAge: cdk.Duration.days(365),
-						includeSubdomains: true,
-						override: true,
-					},
-					contentTypeOptions: { override: true },
-					frameOptions: {
-						frameOption: cloudfront.HeadersFrameOption.DENY,
-						override: true,
-					},
-					referrerPolicy: {
-						referrerPolicy:
-							cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
-						override: true,
-					},
+		const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, "SecurityHeaders", {
+			securityHeadersBehavior: {
+				contentSecurityPolicy: {
+					contentSecurityPolicy:
+						"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'",
+					override: true,
+				},
+				strictTransportSecurity: {
+					accessControlMaxAge: cdk.Duration.days(365),
+					includeSubdomains: true,
+					override: true,
+				},
+				contentTypeOptions: { override: true },
+				frameOptions: {
+					frameOption: cloudfront.HeadersFrameOption.DENY,
+					override: true,
+				},
+				referrerPolicy: {
+					referrerPolicy: cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
+					override: true,
 				},
 			},
-		);
+		});
 
 		// S3 origin with OAC
 		const s3Origin = origins.S3BucketOrigin.withOriginAccessControl(siteBucket);
@@ -155,8 +146,7 @@ export class TodoStack extends cdk.Stack {
 					viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
 					cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
 					allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-					originRequestPolicy:
-						cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+					originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
 				},
 			},
 			defaultRootObject: "index.html",
