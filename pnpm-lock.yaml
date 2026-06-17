@@ -21,8 +21,8 @@ importers:
         specifier: ^3.700.0
         version: 3.1007.0(@aws-sdk/client-dynamodb@3.1007.0)
       hono:
-        specifier: ^4.12.21
-        version: 4.12.21
+        specifier: ^4.12.25
+        version: 4.12.25
       ulid:
         specifier: ^2.3.0
         version: 2.4.0
@@ -32,7 +32,7 @@ importers:
     devDependencies:
       '@hono/node-server':
         specifier: ^1.13.0
-        version: 1.19.11(hono@4.12.21)
+        version: 1.19.11(hono@4.12.25)
       '@types/aws-lambda':
         specifier: ^8.10.0
         version: 8.10.161
@@ -1535,8 +1535,8 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hono@4.12.21:
-    resolution: {integrity: sha512-uV63apnb0kyPtAUwoWgaGh9HyIFcv8lgmzPZSiTBQAFOFGIzka5EZ1dZocmGnn0XdX0+XTqJ6Tqv7selMuGLRQ==}
+  hono@4.12.25:
+    resolution: {integrity: sha512-2NFaIyNVgJmBs/ecmtGzlmluTFs5cHEWGTdu0t1HBwYzoGXOL5nUQBRMXsXWla5i4KkG//QMzVP88m1+I3fdAQ==}
     engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@4.0.0:
@@ -2738,9 +2738,9 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/node-server@1.19.11(hono@4.12.21)':
+  '@hono/node-server@1.19.11(hono@4.12.25)':
     dependencies:
-      hono: 4.12.21
+      hono: 4.12.25
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -3581,7 +3581,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.12.21: {}
+  hono@4.12.25: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:
